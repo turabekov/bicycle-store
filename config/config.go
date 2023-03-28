@@ -32,9 +32,9 @@ func Load() Config {
 	cfg.ServerPort = ":4001"
 
 	cfg.PostgresHost = "localhost"
-	cfg.PostgresUser = "khumoyun"
-	cfg.PostgresDatabase = "bikestore"
-	cfg.PostgresPassword = "admin@111"
+	cfg.PostgresUser = "asadbek"
+	cfg.PostgresDatabase = "store"
+	cfg.PostgresPassword = "7562462"
 	cfg.PostgresPort = "5432"
 	cfg.DefaultOffset = 0
 	cfg.DefaultLimit = 10

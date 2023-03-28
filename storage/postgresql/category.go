@@ -25,37 +25,25 @@ func (r *categoryRepo) Create(ctx context.Context, req *models.CreateCategory) (
 		id    int
 	)
 
-	// get last id
-	query = `
-	SELECT
-		category_id
-	FROM categories
-	ORDER BY category_id  DESC
-	LIMIT 1
-`
-	err := r.db.QueryRow(ctx, query).Scan(
-		&id,
-	)
-	if err != nil {
-		return 0, err
-	}
-
 	query = `
 		INSERT INTO categories(
 			category_id, 
 			category_name 
-	)
-	VALUES ($1, $2)`
-
-	_, err = r.db.Exec(ctx, query,
-		id+1,
+		)
+		VALUES (
+			(
+				SELECT MAX(category_id) + 1 FROM categories
+			),
+			$1) RETURNING category_id
+	`
+	err := r.db.QueryRow(ctx, query,
 		req.CategoryName,
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	return id + 1, nil
+	return id, nil
 }
 
 func (r *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryKey) (*models.Category, error) {

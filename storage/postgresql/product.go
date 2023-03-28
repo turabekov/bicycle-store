@@ -115,13 +115,17 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 	query = `
 		SELECT
 			COUNT(*) OVER(),
-			product_id, 
-			product_name, 
-			brand_id,
-			category_id,
-			model_year,
-			list_price
-		FROM products
+			p.product_id, 
+			p.product_name, 
+			p.brand_id,
+			p.category_id,
+			p.model_year,
+			p.list_price,
+
+			c.category_id,
+			c.category_name
+		FROM products AS p
+		JOIN categories AS c ON c.category_id = p.category_id
 	`
 
 	if len(req.Search) > 0 {
@@ -146,6 +150,8 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 	for rows.Next() {
 		var product models.Product
+		product.CategoryData = &models.Category{}
+
 		err = rows.Scan(
 			&resp.Count,
 			&product.ProductId,
@@ -154,6 +160,8 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 			&product.CategoryId,
 			&product.ModelYear,
 			&product.ListPrice,
+			&product.CategoryData.CategoryId,
+			&product.CategoryData.CategoryName,
 		)
 		if err != nil {
 			return nil, err
