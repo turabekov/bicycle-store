@@ -174,7 +174,7 @@ func (r *brandRepo) Delete(ctx context.Context, req *models.CategoryPrimaryKey) 
 	query := `
 		DELETE 
 		FROM brands
-		WHERE category_id = $1
+		WHERE brand_id = $1
 	`
 
 	result, err := r.db.Exec(ctx, query, req.CategoryId)
