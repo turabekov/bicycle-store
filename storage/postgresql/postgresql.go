@@ -19,6 +19,7 @@ type Store struct {
 	stock    storage.StockRepoI
 	stores   storage.StoreRepoI
 	customer storage.CustomerRepoI
+	staff    storage.StaffRepoI
 	// order    storage.OrderRepoI
 }
 
@@ -48,28 +49,13 @@ func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
 		stock:    NewStockRepo(pgpool),
 		stores:   NewStoreRepo(pgpool),
 		customer: NewCustomerRepo(pgpool),
+		staff:    NewStaffRepo(pgpool),
 	}, nil
 }
 
 func (s *Store) CloseDB() {
 	s.db.Close()
 }
-
-// func (s *Store) Customer() storage.CustomerRepoI {
-// 	if s.customer == nil {
-// 		s.customer = NewCustomerRepo(s.db)
-// 	}
-
-// 	return s.customer
-// }
-
-// func (s *Store) User() storage.UserRepoI {
-// 	if s.user == nil {
-// 		s.user = NewUserRepo(s.db)
-// 	}
-
-// 	return s.user
-// }
 
 func (s *Store) Brand() storage.BrandRepoI {
 	if s.brand == nil {
@@ -117,6 +103,14 @@ func (s *Store) Customer() storage.CustomerRepoI {
 	}
 
 	return s.customer
+}
+
+func (s *Store) Staff() storage.StaffRepoI {
+	if s.staff == nil {
+		s.staff = NewStaffRepo(s.db)
+	}
+
+	return s.staff
 }
 
 // func (s *Store) Order() storage.OrderRepoI {

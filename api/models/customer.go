@@ -17,7 +17,6 @@ type CustomerPrimaryKey struct {
 }
 
 type CreateCustomer struct {
-	CustomerId int    `json:"customer_id"`
 	FirstName  string `json:"first_name"`
 	LastName   string `json:"last_name"`
 	Phone      string `json:"phone"`

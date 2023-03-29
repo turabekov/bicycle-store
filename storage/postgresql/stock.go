@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"app/api/models"
+	"app/pkg/helper"
 	"context"
 	"database/sql"
 	"fmt"
@@ -20,32 +21,32 @@ func NewStockRepo(db *pgxpool.Pool) *stockRepo {
 	}
 }
 
-// func (r *stockRepo) Create(ctx context.Context, req *models.CreateStock) (int, int, error) {
-// 	var (
-// 		query     string
-// 		storeId   int
-// 		productId int
-// 	)
+func (r *stockRepo) Create(ctx context.Context, req *models.CreateStock) (int, int, error) {
+	var (
+		query     string
+		storeId   int
+		productId int
+	)
 
-// 	query = `
-// 		INSERT INTO stocks(
-// 			store_id,
-// 			product_id,
-// 			quantity
-// 		)
-// 		VALUES ($1, $2, $3) RETURNING store_id, product_id
-// 	`
-// 	err := r.db.QueryRow(ctx, query,
-// 		req.StoreId,
-// 		req.ProductId,
-// 		req.Quantity,
-// 	).Scan(&storeId, productId)
-// 	if err != nil {
-// 		return 0, 0, err
-// 	}
+	query = `
+		INSERT INTO stocks(
+			store_id,
+			product_id,
+			quantity
+		)
+		VALUES ($1, $2, $3) RETURNING store_id, product_id
+	`
+	err := r.db.QueryRow(ctx, query,
+		req.StoreId,
+		req.ProductId,
+		req.Quantity,
+	).Scan(&storeId, productId)
+	if err != nil {
+		return 0, 0, err
+	}
 
-// 	return storeId, productId, nil
-// }
+	return storeId, productId, nil
+}
 
 func (r *stockRepo) GetByID(ctx context.Context, req *models.StockPrimaryKey) (*models.GetStock, error) {
 
@@ -55,6 +56,30 @@ func (r *stockRepo) GetByID(ctx context.Context, req *models.StockPrimaryKey) (*
 		productIds []sql.NullInt64
 		amounts    []sql.NullInt64
 	)
+
+	if req.ProductId > 0 {
+		query = `
+			SELECT
+				store_id,
+				product_id,
+				quantity
+			FROM stocks
+			WHERE store_id = $1 AND product_id = $2
+		`
+		fmt.Println(query)
+		stock.Products = append(stock.Products, &models.ProductData{})
+		err := r.db.QueryRow(ctx, query, req.StoreId, req.ProductId).Scan(
+			&stock.StoreId,
+			&stock.Products[0].ProductId,
+			&stock.Products[0].Quantity,
+		)
+		fmt.Println("Hello")
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(stock)
+		return &stock, nil
+	}
 
 	query = `
 		SELECT
@@ -158,42 +183,56 @@ func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest
 	return resp, nil
 }
 
-// func (r *stockRepo) Update(ctx context.Context, req *models.UpdateCategory) (int64, error) {
-// 	var (
-// 		query  string
-// 		params map[string]interface{}
-// 	)
+func (r *stockRepo) Update(ctx context.Context, req *models.UpdateStock) (int64, error) {
+	var (
+		query  string
+		params map[string]interface{}
+	)
 
-// 	query = `
-// 		UPDATE
-// 		categories
-// 		SET
-// 			category_id = :category_id,
-// 			category_name = :category_name
-// 		WHERE category_id = :category_id
-// 	`
+	query = `
+		UPDATE
+		stocks
+		SET
+			quantity = :quantity
+		WHERE store_id = :store_id AND product_id = :product_id
+	`
 
-// 	params = map[string]interface{}{
-// 		"category_id":   req.CategoryId,
-// 		"category_name": req.CategoryName,
-// 	}
+	params = map[string]interface{}{
+		"store_id":   req.StoreId,
+		"product_id": req.ProductId,
+		"quantity":   req.Quantity,
+	}
 
-// 	query, args := helper.ReplaceQueryParams(query, params)
+	query, args := helper.ReplaceQueryParams(query, params)
 
-// 	result, err := r.db.Exec(ctx, query, args...)
-// 	if err != nil {
-// 		return 0, err
-// 	}
+	result, err := r.db.Exec(ctx, query, args...)
+	if err != nil {
+		return 0, err
+	}
 
-// 	return result.RowsAffected(), nil
-// }
+	return result.RowsAffected(), nil
+}
 
 func (r *stockRepo) Delete(ctx context.Context, req *models.StockPrimaryKey) (int64, error) {
+
+	var (
+		storeId   string
+		productId string
+	)
+	if req.StoreId > 0 {
+		storeId = fmt.Sprintf(" store_id = %d ", req.StoreId)
+	}
+
 	query := `
 		DELETE
 		FROM stocks
-		WHERE store_id = $1 AND product_id = $2
-	`
+		WHERE 
+	` + storeId
+
+	if req.ProductId > 0 {
+		productId = fmt.Sprintf(" product_id = %d ", req.ProductId)
+		query += "AND" + productId
+	}
 
 	result, err := r.db.Exec(ctx, query, req.StoreId, req.ProductId)
 	if err != nil {

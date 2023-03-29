@@ -23,27 +23,38 @@ import (
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) CreateStock(c *gin.Context) {
 
-	// var createStock models.CreateStock
+	var createStock models.CreateStock
 
-	// err := c.ShouldBindJSON(&createStock) // parse req body to given type struct
-	// if err != nil {
-	// 	h.handlerResponse(c, "create product", http.StatusBadRequest, err.Error())
-	// 	return
-	// }
+	err := c.ShouldBindJSON(&createStock) // parse req body to given type struct
+	if err != nil {
+		h.handlerResponse(c, "create product", http.StatusBadRequest, err.Error())
+		return
+	}
 
-	// id, err := h.storages.Stock().Create(context.Background(), &createStock)
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.create", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	storeId, prId, err := h.storages.Stock().Create(context.Background(), &createStock)
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.create", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{ProductId: id})
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{ProductId: prId, StoreId: storeId})
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// h.handlerResponse(c, "create stock", http.StatusCreated, resp)
+	for i, val := range resp.Products {
+		val.ProductData = &models.Product{}
+		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
+		if err != nil {
+			h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		resp.Products[i].ProductData = productData
+	}
+
+	h.handlerResponse(c, "create stock", http.StatusCreated, resp)
 }
 
 // Get By ID Stock godoc
@@ -55,12 +66,25 @@ func (h *Handler) CreateStock(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
+// @Param product_id query string false "product_id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) GetByIdStock(c *gin.Context) {
 
+	var err error
+
 	id := c.Param("id")
+	productId := c.Query("product_id")
+	productInt := 0
+
+	if len(productId) > 0 {
+		productInt, err = strconv.Atoi(id)
+		if err != nil {
+			h.handlerResponse(c, "storage.stock.getByID", http.StatusBadRequest, "product_id incorrect")
+			return
+		}
+	}
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
@@ -68,13 +92,14 @@ func (h *Handler) GetByIdStock(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{StoreId: idInt})
+	resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{StoreId: idInt, ProductId: productInt})
 	if err != nil {
 		h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	for i, val := range resp.Products {
+		val.ProductData = &models.Product{}
 		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
 		if err != nil {
 			h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
@@ -155,42 +180,53 @@ func (h *Handler) GetListStock(c *gin.Context) {
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) UpdateStock(c *gin.Context) {
 
-	// var updateStock models.UpdateStock
+	var updateStock models.UpdateStock
 
-	// id := c.Param("id")
+	id := c.Param("id")
 
-	// err := c.ShouldBindJSON(&updateStock)
-	// if err != nil {
-	// 	h.handlerResponse(c, "update stock", http.StatusBadRequest, err.Error())
-	// 	return
-	// }
+	err := c.ShouldBindJSON(&updateStock)
+	if err != nil {
+		h.handlerResponse(c, "update stock", http.StatusBadRequest, err.Error())
+		return
+	}
 
-	// idInt, err := strconv.Atoi(id)
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.getByID", http.StatusBadRequest, "id incorrect")
-	// 	return
-	// }
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getByID", http.StatusBadRequest, "id incorrect")
+		return
+	}
 
-	// updateStock.ProductId = idInt
+	updateStock.StoreId = idInt
 
-	// rowsAffected, err := h.storages.Stock().Update(context.Background(), &updateStock)
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.update", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	rowsAffected, err := h.storages.Stock().Update(context.Background(), &updateStock)
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.update", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// if rowsAffected <= 0 {
-	// 	h.handlerResponse(c, "storage.stock.update", http.StatusBadRequest, "now rows affected")
-	// 	return
-	// }
+	if rowsAffected <= 0 {
+		h.handlerResponse(c, "storage.stock.update", http.StatusBadRequest, "now rows affected")
+		return
+	}
 
-	// resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{ProductId: idInt})
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	resp, err := h.storages.Stock().GetByID(context.Background(), &models.StockPrimaryKey{ProductId: updateStock.ProductId, StoreId: idInt})
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// h.handlerResponse(c, "update stock", http.StatusAccepted, resp)
+	for i, val := range resp.Products {
+		val.ProductData = &models.Product{}
+		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
+		if err != nil {
+			h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		resp.Products[i].ProductData = productData
+	}
+
+	h.handlerResponse(c, "update stock", http.StatusAccepted, resp)
 }
 
 // DELETE Stock godoc
@@ -208,23 +244,23 @@ func (h *Handler) UpdateStock(c *gin.Context) {
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) DeleteStock(c *gin.Context) {
 
-	// id := c.Param("id")
+	id := c.Param("id")
 
-	// idInt, err := strconv.Atoi(id)
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.getByID", http.StatusBadRequest, "id incorrect")
-	// 	return
-	// }
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getByID", http.StatusBadRequest, "id incorrect")
+		return
+	}
 
-	// rowsAffected, err := h.storages.Stock().Delete(context.Background(), &models.StockPrimaryKey{ProductId: idInt})
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.stock.delete", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// if rowsAffected <= 0 {
-	// 	h.handlerResponse(c, "storage.stock.delete", http.StatusBadRequest, "now rows affected")
-	// 	return
-	// }
+	rowsAffected, err := h.storages.Stock().Delete(context.Background(), &models.StockPrimaryKey{StoreId: idInt})
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.delete", http.StatusInternalServerError, err.Error())
+		return
+	}
+	if rowsAffected <= 0 {
+		h.handlerResponse(c, "storage.stock.delete", http.StatusBadRequest, "now rows affected")
+		return
+	}
 
-	// h.handlerResponse(c, "delete stock", http.StatusNoContent, nil)
+	h.handlerResponse(c, "delete stock", http.StatusNoContent, nil)
 }

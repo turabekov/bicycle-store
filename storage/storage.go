@@ -13,6 +13,7 @@ type StorageI interface {
 	Stock() StockRepoI
 	Store() StoreRepoI
 	Customer() CustomerRepoI
+	Staff() StaffRepoI
 }
 
 type ProductRepoI interface {
@@ -40,10 +41,10 @@ type BrandRepoI interface {
 }
 
 type StockRepoI interface {
-	// Create(context.Context, *models.CreateBrand) (int, error)
+	Create(ctx context.Context, req *models.CreateStock) (int, int, error)
 	GetByID(ctx context.Context, req *models.StockPrimaryKey) (*models.GetStock, error)
 	GetList(ctx context.Context, req *models.GetListStockRequest) (resp *models.GetListStockResponse, err error)
-	// Update(ctx context.Context, req *models.UpdateBrand) (int64, error)
+	Update(ctx context.Context, req *models.UpdateStock) (int64, error)
 	Delete(ctx context.Context, req *models.StockPrimaryKey) (int64, error)
 }
 
@@ -63,4 +64,13 @@ type CustomerRepoI interface {
 	UpdatePut(ctx context.Context, req *models.UpdateCustomer) (int64, error)
 	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
 	Delete(ctx context.Context, req *models.CustomerPrimaryKey) (int64, error)
+}
+
+type StaffRepoI interface {
+	Create(ctx context.Context, req *models.CreateStaff) (int, error)
+	GetByID(ctx context.Context, req *models.StaffPrimaryKey) (*models.Staff, error)
+	GetList(ctx context.Context, req *models.GetListStaffRequest) (resp *models.GetListStaffResponse, err error)
+	UpdatePut(ctx context.Context, req *models.UpdateStaff) (int64, error)
+	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
+	Delete(ctx context.Context, req *models.StaffPrimaryKey) (int64, error)
 }
