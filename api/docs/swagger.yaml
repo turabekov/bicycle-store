@@ -27,6 +27,27 @@ definitions:
       category_name:
         type: string
     type: object
+  models.CreateCustomer:
+    properties:
+      city:
+        type: string
+      customer_id:
+        type: integer
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zip_code:
+        type: string
+    type: object
   models.CreateProduct:
     properties:
       brand_id:
@@ -68,6 +89,11 @@ definitions:
       zip_code:
         type: string
     type: object
+  models.CustomerPrimaryKey:
+    properties:
+      customer_id:
+        type: integer
+    type: object
   models.PatchRequest:
     properties:
       fields:
@@ -106,6 +132,27 @@ definitions:
       category_id:
         type: integer
       category_name:
+        type: string
+    type: object
+  models.UpdateCustomer:
+    properties:
+      city:
+        type: string
+      customer_id:
+        type: integer
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zip_code:
         type: string
     type: object
   models.UpdateProduct:
@@ -638,6 +685,298 @@ paths:
       summary: Update Category
       tags:
       - Category
+  /customer:
+    get:
+      consumes:
+      - application/json
+      description: Get List Customer
+      operationId: get_list_customer
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List Customer
+      tags:
+      - Customer
+    post:
+      consumes:
+      - application/json
+      description: Create Customer
+      operationId: create_customer
+      parameters:
+      - description: CreateCustomerRequest
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCustomer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create Customer
+      tags:
+      - Customer
+  /customer/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Customer
+      operationId: delete_customer
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: DeleteCustomerRequest
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CustomerPrimaryKey'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete Customer
+      tags:
+      - Customer
+    get:
+      consumes:
+      - application/json
+      description: Get By ID Customer
+      operationId: get_by_id_customer
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get By ID Customer
+      tags:
+      - Customer
+    patch:
+      consumes:
+      - application/json
+      description: Update PATCH Customer
+      operationId: update_customer
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdatePatchRequest
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.PatchRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update PATCH Customer
+      tags:
+      - Customer
+    put:
+      consumes:
+      - application/json
+      description: Update Customer
+      operationId: update_customer
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdateCustomerRequest
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCustomer'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update Customer
+      tags:
+      - Customer
   /product:
     get:
       consumes:

@@ -12,6 +12,7 @@ type StorageI interface {
 	Brand() BrandRepoI
 	Stock() StockRepoI
 	Store() StoreRepoI
+	Customer() CustomerRepoI
 }
 
 type ProductRepoI interface {
@@ -53,4 +54,13 @@ type StoreRepoI interface {
 	UpdatePut(ctx context.Context, req *models.UpdateStore) (int64, error)
 	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
 	Delete(ctx context.Context, req *models.StorePrimaryKey) (int64, error)
+}
+
+type CustomerRepoI interface {
+	Create(ctx context.Context, req *models.CreateCustomer) (int, error)
+	GetByID(ctx context.Context, req *models.CustomerPrimaryKey) (*models.Customer, error)
+	GetList(ctx context.Context, req *models.GetListCustomerRequest) (resp *models.GetListCustomerResponse, err error)
+	UpdatePut(ctx context.Context, req *models.UpdateCustomer) (int64, error)
+	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
+	Delete(ctx context.Context, req *models.CustomerPrimaryKey) (int64, error)
 }
