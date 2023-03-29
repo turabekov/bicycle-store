@@ -26,21 +26,6 @@ func (r *productRepo) Create(ctx context.Context, req *models.CreateProduct) (in
 	)
 
 	query = `
-		SELECT
-			product_id
-		FROM products
-		ORDER BY product_id  DESC
-		LIMIT 1
-	`
-
-	err := r.db.QueryRow(ctx, query).Scan(
-		&id,
-	)
-	if err != nil {
-		return 0, err
-	}
-
-	query = `
 		INSERT INTO products(
 			product_id, 
 			product_name, 
@@ -49,17 +34,22 @@ func (r *productRepo) Create(ctx context.Context, req *models.CreateProduct) (in
 			model_year,
 			list_price
 		)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES (
+			(
+				SELECT MAX(product_id) + 1 FROM products
+			)
+			, $1, $2, $3, $4, $5) RETURNING product_id
 	`
+	fmt.Println(query)
 
-	_, err = r.db.Exec(ctx, query,
-		id+1,
+	err := r.db.QueryRow(ctx, query,
 		req.ProductName,
 		req.BrandId,
 		req.CategoryId,
 		req.ModelYear,
 		req.ListPrice,
-	)
+	).Scan(&id)
+
 	if err != nil {
 		return 0, err
 	}
@@ -76,21 +66,36 @@ func (r *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 	query = `
 		SELECT
-			product_id, 
-			product_name, 
-			brand_id,
-			category_id,
-			model_year,
-			list_price
-		FROM products
+			p.product_id, 
+			p.product_name, 
+			p.brand_id,
+
+			b.brand_id,
+			b.brand_name,
+
+			p.category_id,
+			c.category_id,
+			c.category_name,
+			
+			p.model_year,
+			p.list_price
+		FROM products AS p
+		JOIN brands AS b ON b.brand_id = p.brand_id
+		JOIN categories AS c ON c.category_id = p.category_id
 		WHERE product_id = $1
 	`
+	product.BrandData = &models.Brand{}
+	product.CategoryData = &models.Category{}
 
 	err := r.db.QueryRow(ctx, query, req.ProductId).Scan(
 		&product.ProductId,
 		&product.ProductName,
 		&product.BrandId,
+		&product.BrandData.BrandId,
+		&product.BrandData.BrandName,
 		&product.CategoryId,
+		&product.CategoryData.CategoryId,
+		&product.CategoryData.CategoryName,
 		&product.ModelYear,
 		&product.ListPrice,
 	)
@@ -115,13 +120,22 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 	query = `
 		SELECT
 			COUNT(*) OVER(),
-			product_id, 
-			product_name, 
-			brand_id,
-			category_id,
-			model_year,
-			list_price
-		FROM products
+			p.product_id, 
+			p.product_name, 
+			p.brand_id,
+
+			b.brand_id,
+			b.brand_name,
+
+			p.category_id,
+			c.category_id,
+			c.category_name,
+			
+			p.model_year,
+			p.list_price
+		FROM products AS p
+		JOIN brands AS b ON b.brand_id = p.brand_id
+		JOIN categories AS c ON c.category_id = p.category_id
 	`
 
 	if len(req.Search) > 0 {
@@ -146,12 +160,18 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 	for rows.Next() {
 		var product models.Product
+		product.BrandData = &models.Brand{}
+		product.CategoryData = &models.Category{}
 		err = rows.Scan(
 			&resp.Count,
 			&product.ProductId,
 			&product.ProductName,
 			&product.BrandId,
+			&product.BrandData.BrandId,
+			&product.BrandData.BrandName,
 			&product.CategoryId,
+			&product.CategoryData.CategoryId,
+			&product.CategoryData.CategoryName,
 			&product.ModelYear,
 			&product.ListPrice,
 		)

@@ -28,6 +28,6 @@ type GetListBrandRequest struct {
 }
 
 type GetListBrandResponse struct {
-	Count  int `json:"count"`
-	Brands []*Brand
+	Count  int      `json:"count"`
+	Brands []*Brand `json:"brands"`
 }

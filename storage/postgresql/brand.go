@@ -25,37 +25,25 @@ func (r *brandRepo) Create(ctx context.Context, req *models.CreateBrand) (int, e
 		id    int
 	)
 
-	// get last id
-	query = `
-	SELECT
-		brand_id
-	FROM brands
-	ORDER BY brand_id  DESC
-	LIMIT 1
-`
-	err := r.db.QueryRow(ctx, query).Scan(
-		&id,
-	)
-	if err != nil {
-		return 0, err
-	}
-
 	query = `
 		INSERT INTO brands(
 			brand_id, 
 			brand_name 
-	)
-	VALUES ($1, $2)`
-
-	_, err = r.db.Exec(ctx, query,
-		id+1,
+		)
+		VALUES (
+			(
+				SELECT MAX(brand_id) + 1 FROM brands
+			),
+			$1) RETURNING brand_id
+	`
+	err := r.db.QueryRow(ctx, query,
 		req.BrandName,
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	return id + 1, nil
+	return id, nil
 }
 
 func (r *brandRepo) GetByID(ctx context.Context, req *models.BrandPrimaryKey) (*models.Brand, error) {
@@ -170,14 +158,14 @@ func (r *brandRepo) Update(ctx context.Context, req *models.UpdateBrand) (int64,
 	return result.RowsAffected(), nil
 }
 
-func (r *brandRepo) Delete(ctx context.Context, req *models.CategoryPrimaryKey) (int64, error) {
+func (r *brandRepo) Delete(ctx context.Context, req *models.BrandPrimaryKey) (int64, error) {
 	query := `
 		DELETE 
 		FROM brands
 		WHERE brand_id = $1
 	`
 
-	result, err := r.db.Exec(ctx, query, req.CategoryId)
+	result, err := r.db.Exec(ctx, query, req.BrandId)
 	if err != nil {
 		return 0, err
 	}

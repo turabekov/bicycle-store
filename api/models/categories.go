@@ -25,5 +25,5 @@ type GetListCategoryRequest struct {
 
 type GetListCategoryResponse struct {
 	Count      int         `json:"count"`
-	Categories []*Category `json:"authors"`
+	Categories []*Category `json:"categories"`
 }

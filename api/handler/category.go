@@ -64,7 +64,7 @@ func (h *Handler) GetByIdCategory(c *gin.Context) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.handlerResponse(c, "storage.product.getByID", http.StatusBadRequest, "id incorrect")
+		h.handlerResponse(c, "storage.category.getByID", http.StatusBadRequest, "id incorrect")
 		return
 	}
 
@@ -145,7 +145,7 @@ func (h *Handler) UpdateCategory(c *gin.Context) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.handlerResponse(c, "storage.product.getByID", http.StatusBadRequest, "id incorrect")
+		h.handlerResponse(c, "storage.category.getByID", http.StatusBadRequest, "id incorrect")
 		return
 	}
 
@@ -190,7 +190,7 @@ func (h *Handler) DeleteCategory(c *gin.Context) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.handlerResponse(c, "storage.product.getByID", http.StatusBadRequest, "id incorrect")
+		h.handlerResponse(c, "storage.category.getByID", http.StatusBadRequest, "id incorrect")
 		return
 	}
 

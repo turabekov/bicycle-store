@@ -5,9 +5,11 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/jackc/pgx/v4 v4.18.1
+	github.com/lib/pq v1.10.2
 	github.com/streamingfast/logging v0.0.0-20221209193439-bff11742bf4c
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.5.3
+	github.com/swaggo/swag v1.8.1
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.6.0
 )
@@ -47,7 +49,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/swaggo/swag v1.8.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
