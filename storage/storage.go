@@ -84,4 +84,5 @@ type OrderRepoI interface {
 	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
 	Delete(ctx context.Context, req *models.OrderPrimaryKey) (int64, error)
 	AddOrderItem(ctx context.Context, req *models.CreateOrderItem) error
+	RemoveOrderItem(ctx context.Context, req *models.OrderItemPrimaryKey) error
 }

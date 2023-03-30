@@ -428,7 +428,6 @@ func (r *orderRepo) AddOrderItem(ctx context.Context, req *models.CreateOrderIte
 			)
 			, $2, $3, $4, $5)
 	`
-	fmt.Println(query)
 
 	_, err := r.db.Exec(ctx, query,
 		req.OrderId,
@@ -450,8 +449,6 @@ func (r *orderRepo) RemoveOrderItem(ctx context.Context, req *models.OrderItemPr
 	query := `
 		DELETE FROM order_items WHERE order_id = $1 AND item_id = $2
 	`
-	fmt.Println(query)
-
 	_, err := r.db.Exec(ctx, query, req.OrderId, req.ItemId)
 
 	if err != nil {
