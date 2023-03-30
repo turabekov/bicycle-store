@@ -63,6 +63,21 @@ definitions:
       store_id:
         type: integer
     type: object
+  models.CreateOrderItem:
+    properties:
+      discount:
+        type: number
+      list_price:
+        type: number
+      order_id:
+        type: integer
+      product_id:
+        description: ItemId      int     `json:"item_id"`
+        type: integer
+      quantity:
+        description: ProductData *Product `json:"product_data"`
+        type: integer
+    type: object
   models.CreateProduct:
     properties:
       brand_id:
@@ -1349,6 +1364,52 @@ paths:
       summary: Update Order
       tags:
       - Order
+  /order_item:
+    post:
+      consumes:
+      - application/json
+      description: Create Order Item
+      operationId: create_order_item
+      parameters:
+      - description: CreateOrderItemRequest
+        in: body
+        name: order_item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrderItem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create Order Item
+      tags:
+      - OrderItem
   /product:
     get:
       consumes:

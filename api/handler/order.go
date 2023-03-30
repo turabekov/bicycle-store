@@ -259,3 +259,41 @@ func (h *Handler) DeleteOrder(c *gin.Context) {
 
 	h.handlerResponse(c, "delete order", http.StatusNoContent, nil)
 }
+
+// -------------------------------------------------------------------------------------------
+// Create Order Item godoc
+// @ID create_order_item
+// @Router /order_item [POST]
+// @Summary Create Order Item
+// @Description Create Order Item
+// @Tags OrderItem
+// @Accept json
+// @Produce json
+// @Param order_item body models.CreateOrderItem true "CreateOrderItemRequest"
+// @Success 201 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server Error"
+func (h *Handler) CreateOrderItem(c *gin.Context) {
+
+	var createOrderItem models.CreateOrderItem
+
+	err := c.ShouldBindJSON(&createOrderItem) // parse req body to given type struct
+	if err != nil {
+		h.handlerResponse(c, "create order", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.storages.Order().AddOrderItem(context.Background(), &createOrderItem)
+	if err != nil {
+		h.handlerResponse(c, "storage.order.create", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// resp, err := h.storages.Order().GetByID(context.Background(), &models.OrderPrimaryKey{OrderId: id})
+	// if err != nil {
+	// 	h.handlerResponse(c, "storage.order.getByID", http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+
+	h.handlerResponse(c, "create order", http.StatusCreated, "Order Item Added")
+}

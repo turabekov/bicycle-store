@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -160,6 +161,19 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 	if err != nil {
 		return nil, err
 	}
+
+	// 	query = `
+	// 	SELECT
+	// 		oritem.order_id,
+	// 		oritem.item_id,
+	// 		oritem.product_id,
+	// 		oritem.quantity,
+	// 		oritem.list_price,
+	// 		oritem.discount
+	// 	FROM orders AS o
+	// 	JOIN order_items AS oritem ON oritem.order_id = o.order_id
+	// 	WHERE order_id = $1
+	// `
 
 	return &order, nil
 }
@@ -393,4 +407,75 @@ func (r *orderRepo) Delete(ctx context.Context, req *models.OrderPrimaryKey) (in
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+// ------------------------------------------------------------------------------------------------------------
+func (r *orderRepo) AddOrderItem(ctx context.Context, req *models.CreateOrderItem) error {
+
+	query := `
+		INSERT INTO order_items(
+			order_id, 
+			item_id, 
+			product_id,
+			quantity,
+			list_price,
+			discount
+		)
+		VALUES (
+			$1, 
+			(
+				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = ` + strconv.Itoa(req.OrderId) + `
+			)
+			, $2, $3, $4, $5)
+	`
+	fmt.Println(query)
+
+	_, err := r.db.Exec(ctx, query,
+		req.OrderId,
+		req.ProductId,
+		req.Quantity,
+		req.ListPrice,
+		req.Discount,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *orderRepo) RemoveOrderItem(ctx context.Context, req *models.CreateOrderItem) error {
+
+	query := `
+		INSERT INTO order_items(
+			order_id, 
+			item_id, 
+			product_id,
+			quantity,
+			list_price,
+			discount
+		)
+		VALUES (
+			$1, 
+			(
+				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = ` + strconv.Itoa(req.OrderId) + `
+			)
+			, $2, $3, $4, $5)
+	`
+	fmt.Println(query)
+
+	_, err := r.db.Exec(ctx, query,
+		req.OrderId,
+		req.ProductId,
+		req.Quantity,
+		req.ListPrice,
+		req.Discount,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

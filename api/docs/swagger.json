@@ -1900,6 +1900,89 @@
                 }
             }
         },
+        "/order_item": {
+            "post": {
+                "description": "Create Order Item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OrderItem"
+                ],
+                "summary": "Create Order Item",
+                "operationId": "create_order_item",
+                "parameters": [
+                    {
+                        "description": "CreateOrderItemRequest",
+                        "name": "order_item",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateOrderItem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/product": {
             "get": {
                 "description": "Get List Product",
@@ -3899,6 +3982,28 @@
                     "type": "integer"
                 },
                 "store_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CreateOrderItem": {
+            "type": "object",
+            "properties": {
+                "discount": {
+                    "type": "number"
+                },
+                "list_price": {
+                    "type": "number"
+                },
+                "order_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "description": "ItemId      int     `json:\"item_id\"`",
+                    "type": "integer"
+                },
+                "quantity": {
+                    "description": "ProductData *Product `json:\"product_data\"`",
                     "type": "integer"
                 }
             }
