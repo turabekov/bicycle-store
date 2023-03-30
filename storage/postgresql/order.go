@@ -445,33 +445,14 @@ func (r *orderRepo) AddOrderItem(ctx context.Context, req *models.CreateOrderIte
 	return nil
 }
 
-func (r *orderRepo) RemoveOrderItem(ctx context.Context, req *models.CreateOrderItem) error {
+func (r *orderRepo) RemoveOrderItem(ctx context.Context, req *models.OrderItemPrimaryKey) error {
 
 	query := `
-		INSERT INTO order_items(
-			order_id, 
-			item_id, 
-			product_id,
-			quantity,
-			list_price,
-			discount
-		)
-		VALUES (
-			$1, 
-			(
-				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = ` + strconv.Itoa(req.OrderId) + `
-			)
-			, $2, $3, $4, $5)
+		DELETE FROM order_items WHERE order_id = $1 AND item_id = $2
 	`
 	fmt.Println(query)
 
-	_, err := r.db.Exec(ctx, query,
-		req.OrderId,
-		req.ProductId,
-		req.Quantity,
-		req.ListPrice,
-		req.Discount,
-	)
+	_, err := r.db.Exec(ctx, query, req.OrderId, req.ItemId)
 
 	if err != nil {
 		return err
