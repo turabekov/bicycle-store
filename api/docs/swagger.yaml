@@ -44,7 +44,24 @@ definitions:
       street:
         type: string
       zip_code:
+        type: integer
+    type: object
+  models.CreateOrder:
+    properties:
+      customer_id:
+        type: integer
+      order_date:
         type: string
+      order_status:
+        type: integer
+      required_date:
+        type: string
+      shipped_date:
+        type: string
+      staff_id:
+        type: integer
+      store_id:
+        type: integer
     type: object
   models.CreateProduct:
     properties:
@@ -107,6 +124,11 @@ definitions:
   models.CustomerPrimaryKey:
     properties:
       customer_id:
+        type: integer
+    type: object
+  models.OrderPrimaryKey:
+    properties:
+      order_id:
         type: integer
     type: object
   models.PatchRequest:
@@ -173,7 +195,26 @@ definitions:
       street:
         type: string
       zip_code:
+        type: integer
+    type: object
+  models.UpdateOrder:
+    properties:
+      customer_id:
+        type: integer
+      order_date:
         type: string
+      order_id:
+        type: integer
+      order_status:
+        type: integer
+      required_date:
+        type: string
+      shipped_date:
+        type: string
+      staff_id:
+        type: integer
+      store_id:
+        type: integer
     type: object
   models.UpdateProduct:
     properties:
@@ -1016,6 +1057,298 @@ paths:
       summary: Update Customer
       tags:
       - Customer
+  /order:
+    get:
+      consumes:
+      - application/json
+      description: Get List Order
+      operationId: get_list_order
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List Order
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      description: Create Order
+      operationId: create_order
+      parameters:
+      - description: CreateOrderRequest
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create Order
+      tags:
+      - Order
+  /order/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Order
+      operationId: delete_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: DeleteOrderRequest
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderPrimaryKey'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete Order
+      tags:
+      - Order
+    get:
+      consumes:
+      - application/json
+      description: Get By ID Order
+      operationId: get_by_id_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get By ID Order
+      tags:
+      - Order
+    patch:
+      consumes:
+      - application/json
+      description: Update PATCH Order
+      operationId: update_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdatePatchRequest
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.PatchRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update PATCH Order
+      tags:
+      - Order
+    put:
+      consumes:
+      - application/json
+      description: Update Order
+      operationId: update_order
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: UpdateOrderRequest
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateOrder'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Update Order
+      tags:
+      - Order
   /product:
     get:
       consumes:

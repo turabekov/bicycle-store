@@ -104,6 +104,16 @@ func NewNullString(s string) sql.NullString {
 	}
 }
 
+func NewNullInt32(n int) sql.NullInt32 {
+	if n == 0 {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{
+		Int32: int32(n),
+		Valid: true,
+	}
+}
+
 func NewNullBool(s bool) sql.NullBool {
 	if !s {
 		return sql.NullBool{}

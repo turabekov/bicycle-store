@@ -10,9 +10,7 @@ import (
 )
 
 type Store struct {
-	db *pgxpool.Pool
-	// customer storage.CustomerRepoI
-	// user     storage.UserRepoI
+	db       *pgxpool.Pool
 	brand    storage.BrandRepoI
 	product  storage.ProductRepoI
 	category storage.CategoryRepoI
@@ -20,7 +18,7 @@ type Store struct {
 	stores   storage.StoreRepoI
 	customer storage.CustomerRepoI
 	staff    storage.StaffRepoI
-	// order    storage.OrderRepoI
+	order    storage.OrderRepoI
 }
 
 func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
@@ -50,6 +48,7 @@ func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
 		stores:   NewStoreRepo(pgpool),
 		customer: NewCustomerRepo(pgpool),
 		staff:    NewStaffRepo(pgpool),
+		order:    NewOrderRepo(pgpool),
 	}, nil
 }
 
@@ -113,10 +112,10 @@ func (s *Store) Staff() storage.StaffRepoI {
 	return s.staff
 }
 
-// func (s *Store) Order() storage.OrderRepoI {
-// 	if s.order == nil {
-// 		s.order = NewOrderRepo(s.db)
-// 	}
+func (s *Store) Order() storage.OrderRepoI {
+	if s.order == nil {
+		s.order = NewOrderRepo(s.db)
+	}
 
-// 	return s.order
-// }
+	return s.order
+}

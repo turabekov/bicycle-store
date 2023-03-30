@@ -43,6 +43,7 @@ func (h *Handler) CreateStock(c *gin.Context) {
 		return
 	}
 
+	// get product data
 	for i, val := range resp.Products {
 		val.ProductData = &models.Product{}
 		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
@@ -98,6 +99,7 @@ func (h *Handler) GetByIdStock(c *gin.Context) {
 		return
 	}
 
+	// get product data
 	for i, val := range resp.Products {
 		val.ProductData = &models.Product{}
 		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
@@ -150,6 +152,7 @@ func (h *Handler) GetListStock(c *gin.Context) {
 		return
 	}
 
+	// get products data
 	for _, stock := range resp.Stocks {
 		for i, val := range stock.Products {
 			productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})
@@ -215,6 +218,7 @@ func (h *Handler) UpdateStock(c *gin.Context) {
 		return
 	}
 
+	// get product data
 	for i, val := range resp.Products {
 		val.ProductData = &models.Product{}
 		productData, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: val.ProductId})

@@ -46,5 +46,5 @@ type GetListStaffRequest struct {
 
 type GetListStaffResponse struct {
 	Count  int      `json:"count"`
-	Staffs []*Staff `json:"products"`
+	Staffs []*Staff `json:"staffs"`
 }

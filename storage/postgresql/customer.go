@@ -47,12 +47,12 @@ func (r *customerRepo) Create(ctx context.Context, req *models.CreateCustomer) (
 	err := r.db.QueryRow(ctx, query,
 		req.FirstName,
 		req.LastName,
-		req.Phone,
+		helper.NewNullString(req.Phone),
 		req.Email,
-		req.Street,
-		req.City,
-		req.State,
-		req.ZipCode,
+		helper.NewNullString(req.Street),
+		helper.NewNullString(req.City),
+		helper.NewNullString(req.State),
+		helper.NewNullInt32(req.ZipCode),
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -197,12 +197,12 @@ func (r *customerRepo) UpdatePut(ctx context.Context, req *models.UpdateCustomer
 		"customer_id": req.CustomerId,
 		"first_name":  req.FirstName,
 		"last_name":   req.LastName,
-		"phone":       req.Phone,
+		"phone":       helper.NewNullString(req.Phone),
 		"email":       req.Email,
-		"street":      req.Street,
-		"city":        req.City,
-		"state":       req.State,
-		"zip_code":    req.ZipCode,
+		"street":      helper.NewNullString(req.Street),
+		"city":        helper.NewNullString(req.City),
+		"state":       helper.NewNullString(req.State),
+		"zip_code":    helper.NewNullInt32(req.ZipCode),
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)

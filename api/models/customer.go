@@ -17,14 +17,14 @@ type CustomerPrimaryKey struct {
 }
 
 type CreateCustomer struct {
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
-	Phone      string `json:"phone"`
-	Email      string `json:"email"`
-	Street     string `json:"street"`
-	City       string `json:"city"`
-	State      string `json:"state"`
-	ZipCode    string `json:"zip_code"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+	Street    string `json:"street"`
+	City      string `json:"city"`
+	State     string `json:"state"`
+	ZipCode   int    `json:"zip_code"`
 }
 
 type UpdateCustomer struct {
@@ -36,7 +36,7 @@ type UpdateCustomer struct {
 	Street     string `json:"street"`
 	City       string `json:"city"`
 	State      string `json:"state"`
-	ZipCode    string `json:"zip_code"`
+	ZipCode    int    `json:"zip_code"`
 }
 
 type GetListCustomerRequest struct {
@@ -47,5 +47,5 @@ type GetListCustomerRequest struct {
 
 type GetListCustomerResponse struct {
 	Count     int         `json:"count"`
-	Customers []*Customer `json:"products"`
+	Customers []*Customer `json:"customers"`
 }

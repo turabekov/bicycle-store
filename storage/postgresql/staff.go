@@ -47,10 +47,10 @@ func (r *staffRepo) Create(ctx context.Context, req *models.CreateStaff) (int, e
 		req.FirstName,
 		req.LastName,
 		req.Email,
-		req.Phone,
+		helper.NewNullString(req.Phone),
 		req.Active,
 		req.StoreId,
-		req.ManagerId,
+		helper.NewNullInt32(req.ManagerId),
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -99,7 +99,7 @@ func (r *staffRepo) GetByID(ctx context.Context, req *models.StaffPrimaryKey) (*
 
 			FROM staffs AS s1
 		JOIN stores ON stores.store_id = s1.store_id
-		INNER JOIN staffs AS s2 ON COALESCE(s1.manager_id, 1) = s2.staff_id
+		INNER JOIN staffs AS s2 ON COALESCE(s1.manager_id, s1.staff_id) = s2.staff_id
 		WHERE s1.staff_id = $1;
 	`
 
@@ -186,7 +186,7 @@ func (r *staffRepo) GetList(ctx context.Context, req *models.GetListStaffRequest
 			COALESCE(s2.manager_id, 0)
 		FROM staffs AS s1
 		JOIN stores ON stores.store_id = s1.store_id
-		INNER JOIN staffs AS s2 ON COALESCE(s1.manager_id, 1)= s2.staff_id
+		INNER JOIN staffs AS s2 ON COALESCE(s1.manager_id, s1.staff_id)= s2.staff_id
 	`
 
 	if len(req.Search) > 0 {
@@ -277,10 +277,10 @@ func (r *staffRepo) UpdatePut(ctx context.Context, req *models.UpdateStaff) (int
 		"first_name": req.FirstName,
 		"last_name":  req.LastName,
 		"email":      req.Email,
-		"phone":      req.Phone,
+		"phone":      helper.NewNullString(req.Phone),
 		"active":     req.Active,
 		"store_id":   req.StoreId,
-		"manager_id": req.ManagerId,
+		"manager_id": helper.NewNullInt32(req.ManagerId),
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)

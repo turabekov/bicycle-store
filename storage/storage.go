@@ -14,6 +14,7 @@ type StorageI interface {
 	Store() StoreRepoI
 	Customer() CustomerRepoI
 	Staff() StaffRepoI
+	Order() OrderRepoI
 }
 
 type ProductRepoI interface {
@@ -73,4 +74,13 @@ type StaffRepoI interface {
 	UpdatePut(ctx context.Context, req *models.UpdateStaff) (int64, error)
 	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
 	Delete(ctx context.Context, req *models.StaffPrimaryKey) (int64, error)
+}
+
+type OrderRepoI interface {
+	Create(ctx context.Context, req *models.CreateOrder) (int, error)
+	GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*models.Order, error)
+	GetList(ctx context.Context, req *models.GetListOrderRequest) (resp *models.GetListOrderResponse, err error)
+	Update(ctx context.Context, req *models.UpdateOrder) (int64, error)
+	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
+	Delete(ctx context.Context, req *models.OrderPrimaryKey) (int64, error)
 }

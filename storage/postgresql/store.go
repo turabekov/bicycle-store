@@ -45,12 +45,12 @@ func (r *storeRepo) Create(ctx context.Context, req *models.CreateStore) (int, e
 	`
 	err := r.db.QueryRow(ctx, query,
 		req.StoreName,
-		req.Phone,
-		req.Email,
-		req.Street,
-		req.City,
-		req.State,
-		req.ZipCode,
+		helper.NewNullString(req.Phone),
+		helper.NewNullString(req.Email),
+		helper.NewNullString(req.Street),
+		helper.NewNullString(req.City),
+		helper.NewNullString(req.State),
+		helper.NewNullString(req.ZipCode),
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -70,12 +70,12 @@ func (r *storeRepo) GetByID(ctx context.Context, req *models.StorePrimaryKey) (*
 		SELECT
 			store_id, 
 			store_name,
-			phone,
-			email,
-			street,
-			city,
-			state,
-			zip_code
+			COASLESCE(phone, ''),
+			COASLESCE(email, ''),
+			COASLESCE(street, ''),
+			COASLESCE(city, ''),
+			COASLESCE(state, ''),
+			COASLESCE(zip_code, '')
 		FROM stores
 		WHERE store_id = $1
 	`
@@ -113,12 +113,12 @@ func (r *storeRepo) GetList(ctx context.Context, req *models.GetListStoreRequest
 			COUNT(*) OVER(),
 			store_id, 
 			store_name,
-			phone,
-			email,
-			street,
-			city,
-			state,
-			zip_code
+			COALESCE(phone, ''),
+			COALESCE(email, ''),
+			COALESCE(street, ''),
+			COALESCE(city, ''),
+			COALESCE(state, ''),
+			COALESCE(zip_code, '')
 		FROM stores
 	`
 
@@ -189,12 +189,12 @@ func (r *storeRepo) UpdatePut(ctx context.Context, req *models.UpdateStore) (int
 	params = map[string]interface{}{
 		"store_id":   req.StoreId,
 		"store_name": req.StoreName,
-		"phone":      req.Phone,
-		"email":      req.Email,
-		"street":     req.Street,
-		"city":       req.City,
-		"state":      req.State,
-		"zip_code":   req.ZipCode,
+		"phone":      helper.NewNullString(req.Phone),
+		"email":      helper.NewNullString(req.Email),
+		"street":     helper.NewNullString(req.Street),
+		"city":       helper.NewNullString(req.City),
+		"state":      helper.NewNullString(req.State),
+		"zip_code":   helper.NewNullString(req.ZipCode),
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)

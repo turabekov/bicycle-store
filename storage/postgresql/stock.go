@@ -40,7 +40,7 @@ func (r *stockRepo) Create(ctx context.Context, req *models.CreateStock) (int, i
 		req.StoreId,
 		req.ProductId,
 		req.Quantity,
-	).Scan(&storeId, productId)
+	).Scan(&storeId, &productId)
 	if err != nil {
 		return 0, 0, err
 	}
