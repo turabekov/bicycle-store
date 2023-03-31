@@ -15,6 +15,10 @@ import (
 
 func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger logger.LoggerI) {
 	handler := handler.NewHandler(cfg, store, logger)
+
+	//  report
+	r.PUT("/report/exchange", handler.ExchangeStoreProductHandler)
+
 	// category api
 	r.POST("/category", handler.CreateCategory)
 	r.GET("/category/:id", handler.GetByIdCategory)

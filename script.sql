@@ -91,3 +91,6 @@ WHERE o.order_id = 1616
 
 
 ALTER TABLE order_items ADD COLUMN 
+
+SELECT * FROM stocks WHERE store_id = 1 AND product_id = 1;
+SELECT * FROM stocks WHERE store_id = 2 AND product_id = 1;

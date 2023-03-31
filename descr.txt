@@ -5,7 +5,7 @@
     5. PRODUCT API ready for use  ✅
     6. STAFF API ready for use    ✅
     7. STOCK API ready for use    
-    7. ORDER API ready for use    
+    8. ORDER API ready for use    
 
 
 

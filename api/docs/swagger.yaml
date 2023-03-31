@@ -141,6 +141,17 @@ definitions:
       customer_id:
         type: integer
     type: object
+  models.ExchangeProduct:
+    properties:
+      from_store_id:
+        type: integer
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      to_store_id:
+        type: integer
+    type: object
   models.OrderItemPrimaryKey:
     properties:
       item_id:
@@ -1712,6 +1723,52 @@ paths:
       summary: Update Product
       tags:
       - Product
+  /report/exchange:
+    put:
+      consumes:
+      - application/json
+      description: Exchange Products In Stores
+      operationId: create_exchange
+      parameters:
+      - description: ExchangeProductRequest
+        in: body
+        name: exchange
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExchangeProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Exchange Products In Stores
+      tags:
+      - Report
   /staff:
     get:
       consumes:

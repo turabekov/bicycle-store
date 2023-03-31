@@ -19,6 +19,7 @@ type Store struct {
 	customer storage.CustomerRepoI
 	staff    storage.StaffRepoI
 	order    storage.OrderRepoI
+	report   storage.ReportRepoI
 }
 
 func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
@@ -49,6 +50,7 @@ func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
 		customer: NewCustomerRepo(pgpool),
 		staff:    NewStaffRepo(pgpool),
 		order:    NewOrderRepo(pgpool),
+		report:   NewReportRepo(pgpool),
 	}, nil
 }
 
@@ -118,4 +120,13 @@ func (s *Store) Order() storage.OrderRepoI {
 	}
 
 	return s.order
+}
+
+// -------------------------------------------------
+func (s *Store) Report() storage.ReportRepoI {
+	if s.report == nil {
+		s.report = NewReportRepo(s.db)
+	}
+
+	return s.report
 }

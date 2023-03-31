@@ -15,6 +15,7 @@ type StorageI interface {
 	Customer() CustomerRepoI
 	Staff() StaffRepoI
 	Order() OrderRepoI
+	Report() ReportRepoI
 }
 
 type ProductRepoI interface {
@@ -86,4 +87,9 @@ type OrderRepoI interface {
 	Delete(ctx context.Context, req *models.OrderPrimaryKey) (int64, error)
 	AddOrderItem(ctx context.Context, req *models.CreateOrderItem) error
 	RemoveOrderItem(ctx context.Context, req *models.OrderItemPrimaryKey) error
+}
+
+// -------------------------------------------------------------------------------------
+type ReportRepoI interface {
+	ExchangeStoreProduct(ctx context.Context, req *models.ExchangeProduct) (fromId int, toId int, err error)
 }
