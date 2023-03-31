@@ -141,6 +141,13 @@ definitions:
       customer_id:
         type: integer
     type: object
+  models.OrderItemPrimaryKey:
+    properties:
+      item_id:
+        type: integer
+      order_id:
+        type: integer
+    type: object
   models.OrderPrimaryKey:
     properties:
       order_id:
@@ -166,9 +173,6 @@ definitions:
     type: object
   models.StockPrimaryKey:
     properties:
-      product_id:
-        description: '-------------------------'
-        type: integer
       store_id:
         type: integer
     type: object
@@ -1409,7 +1413,63 @@ paths:
               type: object
       summary: Create Order Item
       tags:
-      - OrderItem
+      - Order
+  /order_item/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Order Item
+      operationId: delete_order_item
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: item_id
+        in: query
+        name: item_id
+        required: true
+        type: string
+      - description: DeleteOrderItemRequest
+        in: body
+        name: orderItem
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderItemPrimaryKey'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete Order Item
+      tags:
+      - Order
   /product:
     get:
       consumes:
@@ -2102,10 +2162,6 @@ paths:
         in: path
         name: id
         required: true
-        type: string
-      - description: product_id
-        in: query
-        name: product_id
         type: string
       produces:
       - application/json

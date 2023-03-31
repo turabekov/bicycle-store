@@ -1922,7 +1922,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "OrderItem"
+                    "Order"
                 ],
                 "summary": "Create Order Item",
                 "operationId": "create_order_item",
@@ -1939,6 +1939,103 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
+                        "description": "Success Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/order_item/{id}": {
+            "delete": {
+                "description": "Delete Order Item",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Delete Order Item",
+                "operationId": "delete_order_item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "item_id",
+                        "name": "item_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "DeleteOrderItemRequest",
+                        "name": "orderItem",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderItemPrimaryKey"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
                         "description": "Success Request",
                         "schema": {
                             "allOf": [
@@ -3137,12 +3234,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "product_id",
-                        "name": "product_id",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4117,6 +4208,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.OrderItemPrimaryKey": {
+            "type": "object",
+            "properties": {
+                "item_id": {
+                    "type": "integer"
+                },
+                "order_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.OrderPrimaryKey": {
             "type": "object",
             "properties": {
@@ -4156,10 +4258,6 @@ const docTemplate = `{
         "models.StockPrimaryKey": {
             "type": "object",
             "properties": {
-                "product_id": {
-                    "description": "-------------------------",
-                    "type": "integer"
-                },
                 "store_id": {
                     "type": "integer"
                 }

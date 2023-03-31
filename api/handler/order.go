@@ -74,6 +74,16 @@ func (h *Handler) GetByIdOrder(c *gin.Context) {
 		return
 	}
 
+	for _, p := range resp.OrderItems {
+		resp, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: p.ProductId})
+		if err != nil {
+			h.handlerResponse(c, "storage.product.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.ProductData = resp
+
+	}
+
 	h.handlerResponse(c, "get order by id", http.StatusCreated, resp)
 }
 
@@ -266,7 +276,7 @@ func (h *Handler) DeleteOrder(c *gin.Context) {
 // @Router /order_item [POST]
 // @Summary Create Order Item
 // @Description Create Order Item
-// @Tags OrderItem
+// @Tags Order
 // @Accept json
 // @Produce json
 // @Param order_item body models.CreateOrderItem true "CreateOrderItemRequest"
@@ -279,13 +289,13 @@ func (h *Handler) CreateOrderItem(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&createOrderItem) // parse req body to given type struct
 	if err != nil {
-		h.handlerResponse(c, "create order", http.StatusBadRequest, err.Error())
+		h.handlerResponse(c, "create order_item", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = h.storages.Order().AddOrderItem(context.Background(), &createOrderItem)
 	if err != nil {
-		h.handlerResponse(c, "storage.order.create", http.StatusInternalServerError, err.Error())
+		h.handlerResponse(c, "storage.order_item.create", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -295,7 +305,7 @@ func (h *Handler) CreateOrderItem(c *gin.Context) {
 	// 	return
 	// }
 
-	h.handlerResponse(c, "create order", http.StatusCreated, "Order Item Added")
+	h.handlerResponse(c, "create order_item", http.StatusCreated, "Order Item Added")
 }
 
 // DELETE Order Item godoc
@@ -303,12 +313,11 @@ func (h *Handler) CreateOrderItem(c *gin.Context) {
 // @Router /order_item/{id} [DELETE]
 // @Summary Delete Order Item
 // @Description Delete Order Item
-// @Tags OrderItem
+// @Tags Order
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
 // @Param item_id query string true "item_id"
-
 // @Param orderItem body models.OrderItemPrimaryKey true "DeleteOrderItemRequest"
 // @Success 204 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -320,21 +329,21 @@ func (h *Handler) DeleteOrderItem(c *gin.Context) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		h.handlerResponse(c, "storage.order.getByID", http.StatusBadRequest, "id incorrect")
+		h.handlerResponse(c, "storage.order_item.getByID", http.StatusBadRequest, "id incorrect")
 		return
 	}
 
 	idItemInt, err := strconv.Atoi(itemId)
 	if err != nil {
-		h.handlerResponse(c, "storage.order.getByID", http.StatusBadRequest, "id incorrect")
+		h.handlerResponse(c, "storage.order_item.getByID", http.StatusBadRequest, "id incorrect")
 		return
 	}
 
 	err = h.storages.Order().RemoveOrderItem(context.Background(), &models.OrderItemPrimaryKey{OrderId: idInt, ItemId: idItemInt})
 	if err != nil {
-		h.handlerResponse(c, "storage.order.delete", http.StatusInternalServerError, err.Error())
+		h.handlerResponse(c, "storage.order_item.delete", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	h.handlerResponse(c, "delete order", http.StatusNoContent, "Deleted succesfully")
+	h.handlerResponse(c, "delete order_item", http.StatusNoContent, "Deleted succesfully")
 }

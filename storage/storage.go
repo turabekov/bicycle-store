@@ -43,7 +43,8 @@ type BrandRepoI interface {
 
 type StockRepoI interface {
 	Create(ctx context.Context, req *models.CreateStock) (int, int, error)
-	GetByID(ctx context.Context, req *models.StockPrimaryKey) (*models.GetStock, error)
+	GetByIdProductStock(ctx context.Context, storeId int, productId int) (resp *models.Stock, err error)
+	GetByID(ctx context.Context, req *models.StockPrimaryKey) (resp *models.GetStock, err error)
 	GetList(ctx context.Context, req *models.GetListStockRequest) (resp *models.GetListStockResponse, err error)
 	Update(ctx context.Context, req *models.UpdateStock) (int64, error)
 	Delete(ctx context.Context, req *models.StockPrimaryKey) (int64, error)

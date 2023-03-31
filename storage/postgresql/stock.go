@@ -7,8 +7,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/lib/pq"
 )
 
 type stockRepo struct {
@@ -36,6 +36,7 @@ func (r *stockRepo) Create(ctx context.Context, req *models.CreateStock) (int, i
 		)
 		VALUES ($1, $2, $3) RETURNING store_id, product_id
 	`
+
 	err := r.db.QueryRow(ctx, query,
 		req.StoreId,
 		req.ProductId,
@@ -48,67 +49,111 @@ func (r *stockRepo) Create(ctx context.Context, req *models.CreateStock) (int, i
 	return storeId, productId, nil
 }
 
-func (r *stockRepo) GetByID(ctx context.Context, req *models.StockPrimaryKey) (*models.GetStock, error) {
+func (r *stockRepo) GetByIdProductStock(ctx context.Context, storeId int, productId int) (resp *models.Stock, err error) {
+	resp = &models.Stock{}
+	resp.StoreData = &models.Store{}
+	resp.ProductData = &models.Product{}
 
-	var (
-		query      string
-		stock      models.GetStock
-		productIds []sql.NullInt64
-		amounts    []sql.NullInt64
-	)
+	query := `
+		SELECT 
+			s.store_id,
 
-	if req.ProductId > 0 {
-		query = `
-			SELECT
-				store_id,
-				product_id,
-				quantity
-			FROM stocks
-			WHERE store_id = $1 AND product_id = $2
-		`
-		fmt.Println(query)
-		stock.Products = append(stock.Products, &models.ProductData{})
-		err := r.db.QueryRow(ctx, query, req.StoreId, req.ProductId).Scan(
-			&stock.StoreId,
-			&stock.Products[0].ProductId,
-			&stock.Products[0].Quantity,
-		)
-		fmt.Println("Hello")
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println(stock)
-		return &stock, nil
-	}
+			st.store_id, 
+			st.store_name,
+			COALESCE(st.phone, ''),
+			COALESCE(st.email, ''),
+			COALESCE(st.street, ''),
+			COALESCE(st.city, ''),
+			COALESCE(st.state, ''),
+			COALESCE(st.zip_code, ''),
 
-	query = `
-		SELECT
-			store_id,
-			ARRAY_AGG(product_id),
-			ARRAY_AGG(quantity)
-		FROM stocks
-		WHERE store_id = $1
-		GROUP BY store_id
+			s.product_id,
+
+			p.product_id, 
+			p.product_name, 
+			p.brand_id,
+			p.category_id,
+			p.model_year,
+			p.list_price,
+			
+			s.quantity
+		FROM stocks AS s
+		JOIN stores AS st ON st.store_id = s.store_id
+		JOIN products AS p ON p.product_id = s.product_id
+		WHERE s.store_id = $1 AND s.product_id = $2
 	`
-	err := r.db.QueryRow(ctx, query, req.StoreId).Scan(
-		&stock.StoreId,
-		pq.Array(&productIds),
-		pq.Array(&amounts),
+
+	err = r.db.QueryRow(ctx, query, storeId, productId).Scan(
+		&resp.StoreId,
+		&resp.StoreData.StoreId,
+		&resp.StoreData.StoreName,
+		&resp.StoreData.Phone,
+		&resp.StoreData.Email,
+		&resp.StoreData.Street,
+		&resp.StoreData.City,
+		&resp.StoreData.State,
+		&resp.StoreData.ZipCode,
+		&resp.ProductId,
+		&resp.ProductData.ProductId,
+		&resp.ProductData.ProductName,
+		&resp.ProductData.BrandId,
+		&resp.ProductData.CategoryId,
+		&resp.ProductData.ModelYear,
+		&resp.ProductData.ListPrice,
+		&resp.Quantity,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, id := range productIds {
-		data := models.ProductData{
-			ProductId: int(id.Int64),
-			Quantity:  int(amounts[i].Int64),
-		}
-		stock.Products = append(stock.Products, &data)
+	return resp, nil
+
+}
+
+func (r *stockRepo) GetByID(ctx context.Context, req *models.StockPrimaryKey) (resp *models.GetStock, err error) {
+	resp = &models.GetStock{}
+
+	var (
+		quantity sql.NullInt64
+		storeId  sql.NullInt64
+		products pgtype.JSONB
+	)
+
+	query := `
+		SELECT
+			s.store_id,
+			SUM(s.quantity),
+			JSONB_AGG (
+				JSONB_BUILD_OBJECT (
+					'product_id', p.product_id,
+					'product_name', p.product_name,
+					'brand_id', p.brand_id,
+					'category_id', p.category_id,
+					'model_year', p.model_year,
+					'list_price', p.list_price,
+					'quantity', s.quantity
+				)
+			) AS product_data
+		FROM stocks AS s 
+		LEFT JOIN products AS p ON p.product_id = s.product_id
+ 		WHERE s.store_id = $1
+		GROUP BY s.store_id
+	`
+	err = r.db.QueryRow(ctx, query, req.StoreId).Scan(
+		&storeId,
+		&quantity,
+		&products,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(stock)
-	return &stock, nil
+	resp.StoreId = int(storeId.Int64)
+	resp.Quantity = int(quantity.Int64)
+
+	products.AssignTo(&resp.Products)
+
+	return resp, nil
 }
 
 func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest) (resp *models.GetListStockResponse, err error) {
@@ -125,10 +170,22 @@ func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest
 	query = `
 		SELECT
 			COUNT(*) OVER(),
-			store_id,
-			ARRAY_AGG(product_id),
-			ARRAY_AGG(quantity)
-		FROM stocks
+			s.store_id,
+			SUM(s.quantity),
+			JSONB_AGG (
+				JSONB_BUILD_OBJECT (
+					'product_id', p.product_id,
+					'product_name', p.product_name,
+					'brand_id', p.brand_id,
+					'category_id', p.category_id,
+					'model_year', p.model_year,
+					'list_price', p.list_price,
+					'quantity', s.quantity
+				)
+			) AS product_data
+		FROM stocks AS s 
+		LEFT JOIN products AS p ON p.product_id = s.product_id
+
 	`
 
 	if len(req.Search) > 0 {
@@ -143,7 +200,7 @@ func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query += filter + " GROUP BY store_id " + offset + limit
+	query += filter + " GROUP BY s.store_id " + offset + limit
 	fmt.Println(query)
 
 	rows, err := r.db.Query(ctx, query)
@@ -153,29 +210,28 @@ func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest
 	defer rows.Close()
 
 	for rows.Next() {
+
 		var (
-			stock      models.GetStock
-			productIds []sql.NullInt64
-			amounts    []sql.NullInt64
+			stock    models.GetStock
+			quantity sql.NullInt64
+			storeId  sql.NullInt64
+			products pgtype.JSONB
 		)
 
 		err = rows.Scan(
 			&resp.Count,
-			&stock.StoreId,
-			pq.Array(&productIds),
-			pq.Array(&amounts),
+			&storeId,
+			&quantity,
+			&products,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		for i, id := range productIds {
-			data := models.ProductData{
-				ProductId: int(id.Int64),
-				Quantity:  int(amounts[i].Int64),
-			}
-			stock.Products = append(stock.Products, &data)
-		}
+		stock.StoreId = int(storeId.Int64)
+		stock.Quantity = int(quantity.Int64)
+
+		products.AssignTo(&stock.Products)
 
 		resp.Stocks = append(resp.Stocks, &stock)
 	}
@@ -216,8 +272,7 @@ func (r *stockRepo) Update(ctx context.Context, req *models.UpdateStock) (int64,
 func (r *stockRepo) Delete(ctx context.Context, req *models.StockPrimaryKey) (int64, error) {
 
 	var (
-		storeId   string
-		productId string
+		storeId string
 	)
 	if req.StoreId > 0 {
 		storeId = fmt.Sprintf(" store_id = %d ", req.StoreId)
@@ -229,12 +284,7 @@ func (r *stockRepo) Delete(ctx context.Context, req *models.StockPrimaryKey) (in
 		WHERE 
 	` + storeId
 
-	if req.ProductId > 0 {
-		productId = fmt.Sprintf(" product_id = %d ", req.ProductId)
-		query += "AND" + productId
-	}
-
-	result, err := r.db.Exec(ctx, query, req.StoreId, req.ProductId)
+	result, err := r.db.Exec(ctx, query, req.StoreId)
 	if err != nil {
 		return 0, err
 	}

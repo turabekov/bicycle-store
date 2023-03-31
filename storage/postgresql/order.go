@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -70,6 +70,25 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 	)
 
 	query = `
+		WITH order_item_data AS (
+			SELECT
+				oi.order_id AS order_id,
+				JSONB_AGG (
+					JSONB_BUILD_OBJECT (
+						'order_id', oi.order_id,
+						'item_id', oi.item_id,
+						'product_id', oi.product_id,
+						'quantity', oi.quantity,
+						'list_price', oi.list_price,
+						'sell_price', oi.sell_price,
+						'discount', oi.discount
+					)
+				) AS order_items
+				
+			FROM order_items AS oi
+			WHERE oi.order_id = $1
+			GROUP BY oi.order_id
+		)
 		SELECT
 			o.order_id, 
 			o.customer_id,
@@ -83,7 +102,7 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 			COALESCE(c.city, ''),
 			COALESCE(c.state, ''),
 			COALESCE(c.zip_code, 0),
-			
+
 			o.order_status,
 			CAST(o.order_date::timestamp AS VARCHAR),
 			CAST(o.required_date::timestamp AS VARCHAR),
@@ -107,18 +126,21 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 			COALESCE(st.phone, ''),
 			st.active,
 			st.store_id,
-			COALESCE(st.manager_id, 0)
+			COALESCE(st.manager_id, 0),
+
+			oi.order_items
 
 		FROM orders AS o
 		JOIN customers AS c ON c.customer_id = o.customer_id
 		JOIN stores AS s ON s.store_id = o.store_id
 		JOIN staffs AS st ON st.staff_id = o.staff_id
-		WHERE order_id = $1
+		JOIN order_item_data AS oi ON oi.order_id = o.order_id
+		WHERE o.order_id = $1
 	`
-	fmt.Println(query)
 	order.CustomerData = &models.Customer{}
 	order.StoreData = &models.Store{}
 	order.StaffData = &models.Staff{}
+	orderItemObject := pgtype.JSON{}
 
 	err := r.db.QueryRow(ctx, query, req.OrderId).Scan(
 		&order.OrderId,
@@ -157,23 +179,15 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		&order.StaffData.Active,
 		&order.StaffData.StoreId,
 		&order.StaffData.ManagerId,
+
+		&orderItemObject,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// 	query = `
-	// 	SELECT
-	// 		oritem.order_id,
-	// 		oritem.item_id,
-	// 		oritem.product_id,
-	// 		oritem.quantity,
-	// 		oritem.list_price,
-	// 		oritem.discount
-	// 	FROM orders AS o
-	// 	JOIN order_items AS oritem ON oritem.order_id = o.order_id
-	// 	WHERE order_id = $1
-	// `
+	orderItemObject.AssignTo(&order.OrderItems)
+
 
 	return &order, nil
 }
@@ -424,7 +438,7 @@ func (r *orderRepo) AddOrderItem(ctx context.Context, req *models.CreateOrderIte
 		VALUES (
 			$1, 
 			(
-				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = ` + strconv.Itoa(req.OrderId) + `
+				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = $1
 			)
 			, $2, $3, $4, $5)
 	`

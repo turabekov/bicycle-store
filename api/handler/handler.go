@@ -38,7 +38,7 @@ func (h *Handler) handlerResponse(c *gin.Context, path string, code int, message
 
 	switch {
 	case code < 300:
-		h.logger.Info(path, logger.Any("info", response))
+		h.logger.Info(path, logger.Any("info", response.Description))
 	case code >= 400:
 		h.logger.Error(path, logger.Any("info", response))
 	}
@@ -62,4 +62,3 @@ func (h *Handler) getLimitQuery(limit string) (int, error) {
 
 	return strconv.Atoi(limit)
 }
-
