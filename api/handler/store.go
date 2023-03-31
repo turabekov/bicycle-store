@@ -172,7 +172,7 @@ func (h *Handler) UpdateStore(c *gin.Context) {
 }
 
 // Update Patch Store godoc
-// @ID update_store
+// @ID update_patch_store
 // @Router /store/{id} [PATCH]
 // @Summary Update PATCH Store
 // @Description Update PATCH Store

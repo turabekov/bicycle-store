@@ -1317,7 +1317,7 @@ const docTemplate = `{
                     "Customer"
                 ],
                 "summary": "Update PATCH Customer",
-                "operationId": "update_customer",
+                "operationId": "update_patch_customer",
                 "parameters": [
                     {
                         "type": "string",
@@ -2963,7 +2963,7 @@ const docTemplate = `{
                     "Staff"
                 ],
                 "summary": "Update PATCH Staff",
-                "operationId": "update_staff",
+                "operationId": "update_patch_staff",
                 "parameters": [
                     {
                         "type": "string",
@@ -3911,7 +3911,7 @@ const docTemplate = `{
                     "Store"
                 ],
                 "summary": "Update PATCH Store",
-                "operationId": "update_store",
+                "operationId": "update_patch_store",
                 "parameters": [
                     {
                         "type": "string",

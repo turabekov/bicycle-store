@@ -980,7 +980,7 @@ paths:
       consumes:
       - application/json
       description: Update PATCH Customer
-      operationId: update_customer
+      operationId: update_patch_customer
       parameters:
       - description: id
         in: path
@@ -1908,7 +1908,7 @@ paths:
       consumes:
       - application/json
       description: Update PATCH Staff
-      operationId: update_staff
+      operationId: update_patch_staff
       parameters:
       - description: id
         in: path
@@ -2442,7 +2442,7 @@ paths:
       consumes:
       - application/json
       description: Update PATCH Store
-      operationId: update_store
+      operationId: update_patch_store
       parameters:
       - description: id
         in: path

@@ -172,7 +172,7 @@ func (h *Handler) UpdateCustomer(c *gin.Context) {
 }
 
 // Update Patch Customer godoc
-// @ID update_customer
+// @ID update_patch_customer
 // @Router /customer/{id} [PATCH]
 // @Summary Update PATCH Customer
 // @Description Update PATCH Customer

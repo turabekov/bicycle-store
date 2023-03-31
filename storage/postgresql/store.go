@@ -70,12 +70,12 @@ func (r *storeRepo) GetByID(ctx context.Context, req *models.StorePrimaryKey) (*
 		SELECT
 			store_id, 
 			store_name,
-			COASLESCE(phone, ''),
-			COASLESCE(email, ''),
-			COASLESCE(street, ''),
-			COASLESCE(city, ''),
-			COASLESCE(state, ''),
-			COASLESCE(zip_code, '')
+			COALESCE(phone, ''),
+			COALESCE(email, ''),
+			COALESCE(street, ''),
+			COALESCE(city, ''),
+			COALESCE(state, ''),
+			COALESCE(zip_code, '')
 		FROM stores
 		WHERE store_id = $1
 	`
@@ -238,8 +238,6 @@ func (r *storeRepo) UpdatePatch(ctx context.Context, req *models.PatchRequest) (
 	req.Fields["store_id"] = req.ID
 
 	query, args := helper.ReplaceQueryParams(query, req.Fields)
-
-	fmt.Println(query)
 
 	result, err := r.db.Exec(ctx, query, args...)
 	if err != nil {
