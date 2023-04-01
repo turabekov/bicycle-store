@@ -16,6 +16,7 @@ type StorageI interface {
 	Staff() StaffRepoI
 	Order() OrderRepoI
 	Report() ReportRepoI
+	PromoCode() PromoCodeRepoI
 }
 
 type ProductRepoI interface {
@@ -92,4 +93,12 @@ type OrderRepoI interface {
 // -------------------------------------------------------------------------------------
 type ReportRepoI interface {
 	ExchangeStoreProduct(ctx context.Context, req *models.ExchangeProduct) (fromId int, toId int, err error)
+	StaffSaleReport(ctx context.Context, req *models.GetListEmployeeReportRequest) (resp *models.GetListEmployeeReportResponse, err error)
+}
+
+type PromoCodeRepoI interface {
+	Create(ctx context.Context, req *models.CreatePromoCode) (int, error)
+	GetByID(ctx context.Context, req *models.PromoCodePrimaryKey) (*models.PromoCode, error)
+	GetList(ctx context.Context, req *models.GetListPromoCodeRequest) (resp *models.GetListPromoCodeResponse, err error)
+	Delete(ctx context.Context, req *models.PromoCodePrimaryKey) (int64, error)
 }

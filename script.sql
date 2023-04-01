@@ -94,3 +94,24 @@ ALTER TABLE order_items ADD COLUMN
 
 SELECT * FROM stocks WHERE store_id = 1 AND product_id = 1;
 SELECT * FROM stocks WHERE store_id = 2 AND product_id = 1;
+
+
+
+SELECT
+	(sta.first_name || ' ' || sta.last_name) AS employee,
+    c.category_name,
+    p.product_name,
+    (oi.quantity) AS total_amount,
+    (oi.list_price) * (oi.quantity)  AS total_price,
+    o.order_date,
+    sto.store_name
+FROM orders AS o
+JOIN staffs AS sta ON sta.staff_id = o.staff_id 
+JOIN stores AS sto ON sto.store_id = o.store_id 
+JOIN order_items AS oi ON oi.order_id = o.order_id  
+JOIN products AS p ON oi.product_id = p.product_id
+JOIN categories AS c ON c.category_id = p.category_id
+ORDER BY employee
+;
+
+

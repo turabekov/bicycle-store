@@ -10,16 +10,17 @@ import (
 )
 
 type Store struct {
-	db       *pgxpool.Pool
-	brand    storage.BrandRepoI
-	product  storage.ProductRepoI
-	category storage.CategoryRepoI
-	stock    storage.StockRepoI
-	stores   storage.StoreRepoI
-	customer storage.CustomerRepoI
-	staff    storage.StaffRepoI
-	order    storage.OrderRepoI
-	report   storage.ReportRepoI
+	db        *pgxpool.Pool
+	brand     storage.BrandRepoI
+	product   storage.ProductRepoI
+	category  storage.CategoryRepoI
+	stock     storage.StockRepoI
+	stores    storage.StoreRepoI
+	customer  storage.CustomerRepoI
+	staff     storage.StaffRepoI
+	order     storage.OrderRepoI
+	report    storage.ReportRepoI
+	promoCode storage.PromoCodeRepoI
 }
 
 func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
@@ -41,16 +42,17 @@ func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
 	}
 
 	return &Store{
-		db:       pgpool,
-		product:  NewProductRepo(pgpool),
-		category: NewCategoryRepo(pgpool),
-		brand:    NewBrandRepo(pgpool),
-		stock:    NewStockRepo(pgpool),
-		stores:   NewStoreRepo(pgpool),
-		customer: NewCustomerRepo(pgpool),
-		staff:    NewStaffRepo(pgpool),
-		order:    NewOrderRepo(pgpool),
-		report:   NewReportRepo(pgpool),
+		db:        pgpool,
+		product:   NewProductRepo(pgpool),
+		category:  NewCategoryRepo(pgpool),
+		brand:     NewBrandRepo(pgpool),
+		stock:     NewStockRepo(pgpool),
+		stores:    NewStoreRepo(pgpool),
+		customer:  NewCustomerRepo(pgpool),
+		staff:     NewStaffRepo(pgpool),
+		order:     NewOrderRepo(pgpool),
+		report:    NewReportRepo(pgpool),
+		promoCode: NewPromoCodeRepo(pgpool),
 	}, nil
 }
 
@@ -129,4 +131,12 @@ func (s *Store) Report() storage.ReportRepoI {
 	}
 
 	return s.report
+}
+
+func (s *Store) PromoCode() storage.PromoCodeRepoI {
+	if s.promoCode == nil {
+		s.promoCode = NewPromoCodeRepo(s.db)
+	}
+
+	return s.promoCode
 }

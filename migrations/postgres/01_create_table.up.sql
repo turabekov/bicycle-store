@@ -93,3 +93,12 @@ CREATE TABLE stocks (
 	FOREIGN KEY (store_id) REFERENCES stores (store_id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-------------------------------------------------------------------
+CREATE TABLE promo_code (
+	promo_id INT PRIMARY KEY,
+	name VARCHAR NOT NULL UNIQUE,
+	discount DECIMAL (10, 2) NOT NULL,
+	discount_type VARCHAR CHECK(discount_type = 'percent' OR discount_type = 'fixed') DEFAULT 'fixed',
+	order_limit_price  DECIMAL (10, 2) DEFAULT 0
+)

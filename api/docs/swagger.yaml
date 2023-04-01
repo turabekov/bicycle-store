@@ -91,6 +91,17 @@ definitions:
       product_name:
         type: string
     type: object
+  models.CreatePromoCode:
+    properties:
+      discount:
+        type: number
+      discount_type:
+        type: string
+      name:
+        type: string
+      order_limit_price:
+        type: number
+    type: object
   models.CreateStaff:
     properties:
       active:
@@ -175,6 +186,11 @@ definitions:
   models.ProductPrimaryKey:
     properties:
       product_id:
+        type: integer
+    type: object
+  models.PromoCodePrimaryKey:
+    properties:
+      promo_id:
         type: integer
     type: object
   models.StaffPrimaryKey:
@@ -1723,6 +1739,250 @@ paths:
       summary: Update Product
       tags:
       - Product
+  /promo_code:
+    get:
+      consumes:
+      - application/json
+      description: Get List PromoCode
+      operationId: get_list_promo_code
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List PromoCode
+      tags:
+      - PromoCode
+    post:
+      consumes:
+      - application/json
+      description: Create PromoCode
+      operationId: create_promo_code
+      parameters:
+      - description: CreatePromoCodeRequest
+        in: body
+        name: promoCode
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePromoCode'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create PromoCode
+      tags:
+      - PromoCode
+  /promo_code/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete PromoCode
+      operationId: delete_promo_code
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: DeletePromoCodeRequest
+        in: body
+        name: promo_code
+        required: true
+        schema:
+          $ref: '#/definitions/models.PromoCodePrimaryKey'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete PromoCode
+      tags:
+      - PromoCode
+    get:
+      consumes:
+      - application/json
+      description: Get By ID PromoCode
+      operationId: get_by_id_promo_code
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get By ID PromoCode
+      tags:
+      - PromoCode
+  /report/employee:
+    get:
+      consumes:
+      - application/json
+      description: Report
+      operationId: get_list_emmployee_report
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Report
+      tags:
+      - Report
   /report/exchange:
     put:
       consumes:
