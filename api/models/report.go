@@ -36,3 +36,11 @@ type GetListEmployeeReportResponse struct {
 	EmployeeReports []*EmployeeReport `json:"employee_reports"`
 }
 
+// task 4
+
+type TotalOrderPrice struct {
+	TotalPrice  float64
+	PromoCode   string
+	Discount    float64
+	ResultPrice float64
+}

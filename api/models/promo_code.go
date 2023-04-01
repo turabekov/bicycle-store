@@ -3,7 +3,6 @@ package models
 // task 3
 
 type PromoCode struct {
-	PromoCodeId     int     `json:"promo_id"`
 	Name            string  `json:"name"`
 	Discount        float64 `json:"discount"`
 	DiscountType    string  `json:"discount_type"`
@@ -11,7 +10,7 @@ type PromoCode struct {
 }
 
 type PromoCodePrimaryKey struct {
-	PromoCodeId int `json:"promo_id"`
+	Name string `json:"name"`
 }
 
 type CreatePromoCode struct {

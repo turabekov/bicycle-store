@@ -18,37 +18,32 @@ func NewPromoCodeRepo(db *pgxpool.Pool) *promoCodeRepo {
 	}
 }
 
-func (r *promoCodeRepo) Create(ctx context.Context, req *models.CreatePromoCode) (int, error) {
+func (r *promoCodeRepo) Create(ctx context.Context, req *models.CreatePromoCode) (string, error) {
 	var (
-		query string
-		id    int
+		query     string
+		promoName string
 	)
 
 	query = `
 		INSERT INTO promo_code(
-			promo_id,
 			name,
 			discount, 
 			discount_type,
 			order_limit_price 
 		)
-		VALUES (
-			(
-				SELECT COALESCE(MAX(promo_id), 0) + 1 FROM promo_code
-			),
-			$1, $2, $3, $4) RETURNING promo_id
+		VALUES ($1, $2, $3, $4) RETURNING name
 	`
 	err := r.db.QueryRow(ctx, query,
 		req.Name,
 		req.Discount,
 		req.DiscountType,
 		req.OrderLimitPrice,
-	).Scan(&id)
+	).Scan(&promoName)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return promoName, nil
 }
 
 func (r *promoCodeRepo) GetByID(ctx context.Context, req *models.PromoCodePrimaryKey) (*models.PromoCode, error) {
@@ -60,17 +55,15 @@ func (r *promoCodeRepo) GetByID(ctx context.Context, req *models.PromoCodePrimar
 
 	query = `
 		SELECT
-			promo_id,
 			name,
 			discount, 
 			discount_type,
 			order_limit_price 
 		FROM promo_code
-		WHERE promo_id = $1
+		WHERE name = $1
 	`
 
-	err := r.db.QueryRow(ctx, query, req.PromoCodeId).Scan(
-		&promoCode.PromoCodeId,
+	err := r.db.QueryRow(ctx, query, req.Name).Scan(
 		&promoCode.Name,
 		&promoCode.Discount,
 		&promoCode.DiscountType,
@@ -97,7 +90,6 @@ func (r *promoCodeRepo) GetList(ctx context.Context, req *models.GetListPromoCod
 	query = `
 		SELECT
 			COUNT(*) OVER(),
-			promo_id,
 			name,
 			discount, 
 			discount_type,
@@ -129,7 +121,6 @@ func (r *promoCodeRepo) GetList(ctx context.Context, req *models.GetListPromoCod
 		var promoCode models.PromoCode
 		err = rows.Scan(
 			&resp.Count,
-			&promoCode.PromoCodeId,
 			&promoCode.Name,
 			&promoCode.Discount,
 			&promoCode.DiscountType,
@@ -149,10 +140,10 @@ func (r *promoCodeRepo) Delete(ctx context.Context, req *models.PromoCodePrimary
 	query := `
 		DELETE 
 		FROM promo_code
-		WHERE promo_id = $1
+		WHERE name = $1
 	`
 
-	result, err := r.db.Exec(ctx, query, req.PromoCodeId)
+	result, err := r.db.Exec(ctx, query, req.Name)
 	if err != nil {
 		return 0, err
 	}

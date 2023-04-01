@@ -97,7 +97,7 @@ type ReportRepoI interface {
 }
 
 type PromoCodeRepoI interface {
-	Create(ctx context.Context, req *models.CreatePromoCode) (int, error)
+	Create(ctx context.Context, req *models.CreatePromoCode) (string, error)
 	GetByID(ctx context.Context, req *models.PromoCodePrimaryKey) (*models.PromoCode, error)
 	GetList(ctx context.Context, req *models.GetListPromoCodeRequest) (resp *models.GetListPromoCodeResponse, err error)
 	Delete(ctx context.Context, req *models.PromoCodePrimaryKey) (int64, error)

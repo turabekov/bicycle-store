@@ -3,7 +3,9 @@ package handler
 import (
 	"app/api/models"
 	"context"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,7 +68,7 @@ func (h *Handler) ExchangeStoreProductHandler(c *gin.Context) {
 
 // TASK2
 
-// Get LEmployee Report
+// Get Employee Report
 // @ID get_list_emmployee_report
 // @Router /report/employee [GET]
 // @Summary Report
@@ -105,4 +107,74 @@ func (h *Handler) GetEmployeeReport(c *gin.Context) {
 	}
 
 	h.handlerResponse(c, "get list product response", http.StatusOK, resp)
+}
+
+// TASK4
+
+// Get TotalOrderPrice
+// @ID get_order_price
+// @Router /total_order_price/{id} [GET]
+// @Summary Report
+// @Description Report
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Param id path string true "id"
+// @Param promo_code query string false "promo_code"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server Error"
+func (h *Handler) TotalOrderPrice(c *gin.Context) {
+
+	id := c.Param("id")
+	promo := c.Query("promo_code")
+
+	fmt.Println(id)
+	orderIdInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.handlerResponse(c, "storage.promo_code.getByID", http.StatusBadRequest, "id incorrect")
+		return
+	}
+
+	resp, err := h.storages.Order().GetByID(context.Background(), &models.OrderPrimaryKey{OrderId: orderIdInt})
+	if err != nil {
+		h.handlerResponse(c, "storage.order.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var response models.TotalOrderPrice
+	// calc total price
+	var totalPrice float64
+	for _, item := range resp.OrderItems {
+		totalPrice += item.ListPrice
+	}
+
+	response.TotalPrice = totalPrice
+
+	fmt.Println(promo)
+	if len(promo) > 0 {
+		// get promocode
+		promoCode, err := h.storages.PromoCode().GetByID(context.Background(), &models.PromoCodePrimaryKey{Name: promo})
+		if err != nil {
+			h.handlerResponse(c, "storage.promo_code.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		response.PromoCode = promoCode.Name
+
+		if promoCode.DiscountType == "fixed" && totalPrice >= promoCode.OrderLimitPrice {
+			totalPrice = totalPrice - promoCode.Discount
+			response.Discount = promoCode.Discount
+		} else if promoCode.DiscountType == "percent" && totalPrice >= promoCode.OrderLimitPrice {
+			totalPrice = totalPrice - totalPrice*promoCode.Discount/100
+			response.Discount = totalPrice * promoCode.Discount / 100
+		}
+
+		if totalPrice <= 0 {
+			totalPrice = 0
+		}
+	}
+
+	response.ResultPrice = totalPrice
+	h.handlerResponse(c, "get list product response", http.StatusOK, response)
 }

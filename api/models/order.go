@@ -68,11 +68,9 @@ type OrderItemPrimaryKey struct {
 }
 
 type CreateOrderItem struct {
-	OrderId int `json:"order_id"`
-	// ItemId      int     `json:"item_id"`
-	ProductId   int      `json:"product_id"`
-	// ProductData *Product `json:"product_data"`
-	Quantity    int      `json:"quantity"`
-	ListPrice   float64  `json:"list_price"`
-	Discount    float64  `json:"discount"`
+	OrderId   int     `json:"order_id"`
+	ProductId int     `json:"product_id"`
+	Quantity  int     `json:"quantity"`
+	ListPrice float64 `json:"list_price"`
+	Discount  float64 `json:"discount"`
 }

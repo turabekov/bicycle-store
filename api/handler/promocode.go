@@ -4,7 +4,6 @@ import (
 	"app/api/models"
 	"context"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +41,7 @@ func (h *Handler) CreatePromoCode(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.storages.PromoCode().GetByID(context.Background(), &models.PromoCodePrimaryKey{PromoCodeId: id})
+	resp, err := h.storages.PromoCode().GetByID(context.Background(), &models.PromoCodePrimaryKey{Name: id})
 	if err != nil {
 		h.handlerResponse(c, "storage.promo_code.getByID", http.StatusInternalServerError, err.Error())
 		return
@@ -65,15 +64,9 @@ func (h *Handler) CreatePromoCode(c *gin.Context) {
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) GetByIdPromoCode(c *gin.Context) {
 
-	id := c.Param("id")
+	promoName := c.Param("id")
 
-	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		h.handlerResponse(c, "storage.promo_code.getByID", http.StatusBadRequest, "id incorrect")
-		return
-	}
-
-	resp, err := h.storages.PromoCode().GetByID(context.Background(), &models.PromoCodePrimaryKey{PromoCodeId: idInt})
+	resp, err := h.storages.PromoCode().GetByID(context.Background(), &models.PromoCodePrimaryKey{Name: promoName})
 	if err != nil {
 		h.handlerResponse(c, "storage.promo_code.getByID", http.StatusInternalServerError, err.Error())
 		return
@@ -138,15 +131,9 @@ func (h *Handler) GetListPromoCode(c *gin.Context) {
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) DeletePromoCode(c *gin.Context) {
 
-	id := c.Param("id")
+	promoName := c.Param("id")
 
-	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		h.handlerResponse(c, "storage.promo_code.getByID", http.StatusBadRequest, "id incorrect")
-		return
-	}
-
-	rowsAffected, err := h.storages.PromoCode().Delete(context.Background(), &models.PromoCodePrimaryKey{PromoCodeId: idInt})
+	rowsAffected, err := h.storages.PromoCode().Delete(context.Background(), &models.PromoCodePrimaryKey{Name: promoName})
 	if err != nil {
 		h.handlerResponse(c, "storage.promo_code.delete", http.StatusInternalServerError, err.Error())
 		return

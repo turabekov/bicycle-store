@@ -65,11 +65,39 @@ func (r *orderRepo) Create(ctx context.Context, req *models.CreateOrder) (int, e
 func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*models.Order, error) {
 
 	var (
-		query string
-		order models.Order
+		query         string
+		queryChecking string
+		order         models.Order
 	)
 
-	query = `
+	queryChecking = `
+	SELECT
+		oi.order_id AS order_id,
+		JSONB_AGG (
+			JSONB_BUILD_OBJECT (
+				'order_id', oi.order_id,
+				'item_id', oi.item_id,
+				'product_id', oi.product_id,
+				'quantity', oi.quantity,
+				'list_price', oi.list_price,
+				'sell_price', oi.sell_price,
+				'discount', oi.discount
+			)
+		) AS order_items
+		
+	FROM order_items AS oi
+	WHERE oi.order_id = $1
+	GROUP BY oi.order_id
+	`
+
+	res, err := r.db.Exec(ctx, queryChecking, req.OrderId)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(res)
+
+	if res.RowsAffected() > 0 {
+		query = `
 		WITH order_item_data AS (
 			SELECT
 				oi.order_id AS order_id,
@@ -137,12 +165,109 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		JOIN order_item_data AS oi ON oi.order_id = o.order_id
 		WHERE o.order_id = $1
 	`
+		order.CustomerData = &models.Customer{}
+		order.StoreData = &models.Store{}
+		order.StaffData = &models.Staff{}
+		orderItemObject := pgtype.JSON{}
+
+		err = r.db.QueryRow(ctx, query, req.OrderId).Scan(
+			&order.OrderId,
+			&order.CustomerId,
+			&order.CustomerData.CustomerId,
+			&order.CustomerData.FirstName,
+			&order.CustomerData.LastName,
+			&order.CustomerData.Phone,
+			&order.CustomerData.Email,
+			&order.CustomerData.Street,
+			&order.CustomerData.City,
+			&order.CustomerData.State,
+			&order.CustomerData.ZipCode,
+
+			&order.OrderStatus,
+			&order.OrderDate,
+			&order.RequiredDate,
+			&order.ShippedDate,
+
+			&order.StoreId,
+
+			&order.StoreData.StoreId,
+			&order.StoreData.StoreName,
+			&order.StoreData.Phone,
+			&order.StoreData.Email,
+			&order.StoreData.Street,
+			&order.StoreData.City,
+			&order.StoreData.State,
+			&order.StoreData.ZipCode,
+			&order.StaffId,
+			&order.StaffData.StaffId,
+			&order.StaffData.FirstName,
+			&order.StaffData.LastName,
+			&order.StaffData.Email,
+			&order.StaffData.Phone,
+			&order.StaffData.Active,
+			&order.StaffData.StoreId,
+			&order.StaffData.ManagerId,
+
+			&orderItemObject,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		orderItemObject.AssignTo(&order.OrderItems)
+	}
+
+	query = `
+		SELECT
+			o.order_id, 
+			o.customer_id,
+
+			c.customer_id,
+			c.first_name,
+			c.last_name,
+			COALESCE(c.phone, ''),
+			c.email,
+			COALESCE(c.street, ''),
+			COALESCE(c.city, ''),
+			COALESCE(c.state, ''),
+			COALESCE(c.zip_code, 0),
+
+			o.order_status,
+			CAST(o.order_date::timestamp AS VARCHAR),
+			CAST(o.required_date::timestamp AS VARCHAR),
+			COALESCE(CAST(o.shipped_date::timestamp AS VARCHAR), ''),
+			o.store_id,
+
+			s.store_id,
+			s.store_name,
+			COALESCE(s.phone, ''),
+			COALESCE(s.email, ''),
+			COALESCE(s.street, ''),
+			COALESCE(s.city, ''),
+			COALESCE(s.state, ''),
+			COALESCE(s.zip_code, ''),
+
+			o.staff_id,
+			st.staff_id,
+			st.first_name,
+			st.last_name,
+			st.email,
+			COALESCE(st.phone, ''),
+			st.active,
+			st.store_id,
+			COALESCE(st.manager_id, 0)
+
+		FROM orders AS o
+		JOIN customers AS c ON c.customer_id = o.customer_id
+		JOIN stores AS s ON s.store_id = o.store_id
+		JOIN staffs AS st ON st.staff_id = o.staff_id
+		WHERE o.order_id = $1
+	`
 	order.CustomerData = &models.Customer{}
 	order.StoreData = &models.Store{}
 	order.StaffData = &models.Staff{}
-	orderItemObject := pgtype.JSON{}
 
-	err := r.db.QueryRow(ctx, query, req.OrderId).Scan(
+	err = r.db.QueryRow(ctx, query, req.OrderId).Scan(
 		&order.OrderId,
 		&order.CustomerId,
 		&order.CustomerData.CustomerId,
@@ -179,15 +304,10 @@ func (r *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		&order.StaffData.Active,
 		&order.StaffData.StoreId,
 		&order.StaffData.ManagerId,
-
-		&orderItemObject,
 	)
 	if err != nil {
 		return nil, err
 	}
-
-	orderItemObject.AssignTo(&order.OrderItems)
-
 
 	return &order, nil
 }
@@ -438,7 +558,7 @@ func (r *orderRepo) AddOrderItem(ctx context.Context, req *models.CreateOrderIte
 		VALUES (
 			$1, 
 			(
-				SELECT MAX(item_id) + 1 FROM order_items WHERE order_id = $1
+				SELECT COALESCE(MAX(item_id), 0) + 1 FROM order_items WHERE order_id = $1
 			)
 			, $2, $3, $4, $5)
 	`

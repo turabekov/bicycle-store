@@ -1835,7 +1835,7 @@ const docTemplate = `{
                     "Order"
                 ],
                 "summary": "Update PATCH Order",
-                "operationId": "update_order",
+                "operationId": "update_patch_order",
                 "parameters": [
                     {
                         "type": "string",
@@ -4504,6 +4504,93 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/total_order_price/{id}": {
+            "get": {
+                "description": "Report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Report",
+                "operationId": "get_order_price",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "promo_code",
+                        "name": "promo_code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -4619,11 +4706,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "product_id": {
-                    "description": "ItemId      int     ` + "`" + `json:\"item_id\"` + "`" + `",
                     "type": "integer"
                 },
                 "quantity": {
-                    "description": "ProductData *Product ` + "`" + `json:\"product_data\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -4801,8 +4886,8 @@ const docTemplate = `{
         "models.PromoCodePrimaryKey": {
             "type": "object",
             "properties": {
-                "promo_id": {
-                    "type": "integer"
+                "name": {
+                    "type": "string"
                 }
             }
         },

@@ -72,10 +72,8 @@ definitions:
       order_id:
         type: integer
       product_id:
-        description: ItemId      int     `json:"item_id"`
         type: integer
       quantity:
-        description: ProductData *Product `json:"product_data"`
         type: integer
     type: object
   models.CreateProduct:
@@ -190,8 +188,8 @@ definitions:
     type: object
   models.PromoCodePrimaryKey:
     properties:
-      promo_id:
-        type: integer
+      name:
+        type: string
     type: object
   models.StaffPrimaryKey:
     properties:
@@ -1299,7 +1297,7 @@ paths:
       consumes:
       - application/json
       description: Update PATCH Order
-      operationId: update_order
+      operationId: update_patch_order
       parameters:
       - description: id
         in: path
@@ -2855,4 +2853,53 @@ paths:
       summary: Update Store
       tags:
       - Store
+  /total_order_price/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Report
+      operationId: get_order_price
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: promo_code
+        in: query
+        name: promo_code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Report
+      tags:
+      - Report
 swagger: "2.0"

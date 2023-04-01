@@ -96,8 +96,7 @@ CREATE TABLE stocks (
 
 -------------------------------------------------------------------
 CREATE TABLE promo_code (
-	promo_id INT PRIMARY KEY,
-	name VARCHAR NOT NULL UNIQUE,
+	name VARCHAR PRIMARY KEY NOT NULL UNIQUE ,
 	discount DECIMAL (10, 2) NOT NULL,
 	discount_type VARCHAR CHECK(discount_type = 'percent' OR discount_type = 'fixed') DEFAULT 'fixed',
 	order_limit_price  DECIMAL (10, 2) DEFAULT 0

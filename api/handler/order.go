@@ -182,7 +182,7 @@ func (h *Handler) UpdateOrder(c *gin.Context) {
 }
 
 // Update Patch Order godoc
-// @ID update_order
+// @ID update_patch_order
 // @Router /order/{id} [PATCH]
 // @Summary Update PATCH Order
 // @Description Update PATCH Order
@@ -271,6 +271,8 @@ func (h *Handler) DeleteOrder(c *gin.Context) {
 }
 
 // -------------------------------------------------------------------------------------------
+// TASK 5
+
 // Create Order Item godoc
 // @ID create_order_item
 // @Router /order_item [POST]
@@ -292,20 +294,38 @@ func (h *Handler) CreateOrderItem(c *gin.Context) {
 		h.handlerResponse(c, "create order_item", http.StatusBadRequest, err.Error())
 		return
 	}
+	// get order for getting store_id
+	order, err := h.storages.Order().GetByID(context.Background(), &models.OrderPrimaryKey{OrderId: createOrderItem.OrderId})
+	if err != nil {
+		h.handlerResponse(c, "storage.order.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
 
+	// check count of products in store
+	stockData, err := h.storages.Stock().GetByIdProductStock(context.Background(), order.StoreId, createOrderItem.ProductId)
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
+	if stockData.Quantity <= 0 || createOrderItem.Quantity > stockData.Quantity {
+		h.handlerResponse(c, "create order_item", http.StatusBadRequest, "Товарь не найден")
+		return
+	}
+	// ----------CREATE ORDER ITEM------------------------------------------------------------------------------------------
+	// WHEN create order item in postgres will execute trigger for getting products from store 
 	err = h.storages.Order().AddOrderItem(context.Background(), &createOrderItem)
 	if err != nil {
 		h.handlerResponse(c, "storage.order_item.create", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// resp, err := h.storages.Order().GetByID(context.Background(), &models.OrderPrimaryKey{OrderId: id})
-	// if err != nil {
-	// 	h.handlerResponse(c, "storage.order.getByID", http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	resp, err := h.storages.Order().GetByID(context.Background(), &models.OrderPrimaryKey{OrderId: createOrderItem.OrderId})
+	if err != nil {
+		h.handlerResponse(c, "storage.order.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	h.handlerResponse(c, "create order_item", http.StatusCreated, "Order Item Added")
+	h.handlerResponse(c, "Order Item Added", http.StatusCreated, resp)
 }
 
 // DELETE Order Item godoc
