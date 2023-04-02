@@ -3,8 +3,10 @@ package postgresql
 import (
 	"app/api/models"
 	"context"
+	"database/sql"
 	"fmt"
 
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -119,6 +121,123 @@ func (r *reportRepo) StaffSaleReport(ctx context.Context, req *models.GetListEmp
 		counter++
 	}
 	resp.Count = counter
+
+	return resp, nil
+}
+
+// task6
+func (r *reportRepo) GetCategoryData(ctx context.Context, storeId int) (resp []*models.CategoryStockProduct, err error) {
+
+	resp = []*models.CategoryStockProduct{}
+
+	query := `
+		SELECT
+			c.category_id,
+    		c.category_name, 
+			SUM(s.quantity),
+			JSONB_AGG (
+    				JSONB_BUILD_OBJECT (
+    					'product_id', p.product_id,
+					    'product_name', p.product_name,
+					    'brand_id', p.brand_id,
+					    'category_id', p.category_id,
+    		            'category_data',    JSONB_BUILD_OBJECT(
+    		                'category_id', c.category_id,
+    		                'category_name', c.category_name
+    		            ),
+					    'model_year', p.model_year,
+					    'list_price', p.list_price,
+					    'quantity', s.quantity
+				)
+			) AS product_data
+		FROM stocks AS s 
+		LEFT JOIN products AS p ON p.product_id = s.product_id
+		LEFT JOIN categories AS c ON c.category_id = p.category_id
+		WHERE s.store_id = $1
+		GROUP BY  c.category_id
+	`
+
+	rows, err := r.db.Query(ctx, query, storeId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		categoryStock := &models.CategoryStockProduct{}
+		categoryStock.CategoryShopProducts = []models.StockProductData{}
+		var (
+			categoryName sql.NullString
+			quantity     sql.NullInt64
+			products     pgtype.JSONB
+		)
+
+		err = rows.Scan(
+			&categoryStock.CategoryId,
+			&categoryName,
+			&quantity,
+			&products,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		categoryStock.CategoryName = categoryName.String
+		categoryStock.Quantity = int(quantity.Int64)
+
+		products.AssignTo(&categoryStock.CategoryShopProducts)
+
+		resp = append(resp, categoryStock)
+	}
+
+	return resp, nil
+}
+
+// for dynamic testing
+func (r *reportRepo) GetOnlyCategoryDataFromStock(ctx context.Context) (resp []*models.CategoryStockProductData, err error) {
+
+	resp = []*models.CategoryStockProductData{}
+
+	query := `
+		SELECT
+			c.category_id,
+    		c.category_name, 
+			SUM(s.quantity)
+		FROM stocks AS s 
+		LEFT JOIN products AS p ON p.product_id = s.product_id
+		LEFT JOIN categories AS c ON c.category_id = p.category_id
+		GROUP BY  c.category_id
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		categoryStock := &models.CategoryStockProductData{}
+		var (
+			categoryName sql.NullString
+			quantity     sql.NullInt64
+		)
+
+		err = rows.Scan(
+			&categoryStock.CategoryId,
+			&categoryName,
+			&quantity,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		categoryStock.CategoryName = categoryName.String
+		categoryStock.Quantity = int(quantity.Int64)
+
+		resp = append(resp, categoryStock)
+	}
 
 	return resp, nil
 }

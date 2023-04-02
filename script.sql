@@ -144,3 +144,35 @@ store_id | product_id | quantity
 SELECT * FROM stocks WHERE store_id = 1 AND product_id = 3;
 
 SELECT * FROM stocks WHERE store_id = 1 AND product_id = 3;
+
+
+
+
+--------------------------------------------------------------------
+SELECT
+    c.category_id,
+    c.category_name, 
+	SUM(s.quantity),
+	JSONB_AGG (
+    		JSONB_BUILD_OBJECT (
+                'store_id', 	s.store_id,
+    			'product_id', p.product_id,
+			    'product_name', p.product_name,
+			    'brand_id', p.brand_id,
+			    'category_id', p.category_id,
+                'category_data',    JSONB_BUILD_OBJECT(
+                    'category_id', c.category_id,
+                    'category_name', c.category_name
+                ),
+			    'model_year', p.model_year,
+			    'list_price', p.list_price,
+			    'quantity', s.quantity
+		)
+	) AS product_data
+FROM stocks AS s 
+LEFT JOIN products AS p ON p.product_id = s.product_id
+LEFT JOIN categories AS c ON c.category_id = p.category_id
+WHERE s.store_id = 1
+GROUP BY  c.category_id
+;
+

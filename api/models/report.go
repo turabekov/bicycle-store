@@ -44,3 +44,30 @@ type TotalOrderPrice struct {
 	Discount    float64
 	ResultPrice float64
 }
+
+// task6
+type StockProductData struct {
+	StoreId      int       `json:"store_id"`
+	ProductId    int       `json:"product_id"`
+	ProductName  string    `json:"product_name"`
+	BrandId      int       `json:"brand_id"`
+	BrandData    *Brand    `json:"brand_data"`
+	CategoryId   int       `json:"category_id"`
+	CategoryData *Category `json:"category_data"`
+	ModelYear    int       `json:"model_year"`
+	ListPrice    float64   `json:"list_price"`
+	Quantity     int       `json:"quantity"`
+}
+
+type CategoryStockProduct struct {
+	CategoryId           int                `json:"category_id"`
+	CategoryName         string             `json:"category_name"`
+	Quantity             int                `json:"quantity"`
+	CategoryShopProducts []StockProductData `json:"products_data"`
+}
+
+type CategoryStockProductData struct {
+	CategoryId   int    `json:"category_id"`
+	CategoryName string `json:"category_name"`
+	Quantity     int    `json:"quantity"`
+}

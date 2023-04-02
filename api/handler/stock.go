@@ -76,6 +76,7 @@ func (h *Handler) GetByIdStock(c *gin.Context) {
 		return
 	}
 
+
 	h.handlerResponse(c, "get stock by id", http.StatusCreated, resp)
 }
 

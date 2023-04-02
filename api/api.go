@@ -20,6 +20,10 @@ func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger lo
 	r.PUT("/report/exchange", handler.ExchangeStoreProductHandler)
 	r.GET("/report/employee", handler.GetEmployeeReport)
 	r.GET("/total_order_price/:id", handler.TotalOrderPrice)
+	//  excel
+	r.GET("/report/stock_excel", handler.GetStockDataExcel)
+
+	// r.GET("/report/stock", handler.GetStockDataExcelDynamic)
 
 	// promo_code api
 	r.POST("/promo_code", handler.CreatePromoCode)

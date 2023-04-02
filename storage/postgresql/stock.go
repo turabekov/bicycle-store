@@ -121,22 +121,27 @@ func (r *stockRepo) GetByID(ctx context.Context, req *models.StockPrimaryKey) (r
 
 	query := `
 		SELECT
-			s.store_id,
-			SUM(s.quantity),
-			JSONB_AGG (
-				JSONB_BUILD_OBJECT (
-					'product_id', p.product_id,
-					'product_name', p.product_name,
-					'brand_id', p.brand_id,
-					'category_id', p.category_id,
-					'model_year', p.model_year,
-					'list_price', p.list_price,
-					'quantity', s.quantity
-				)
-			) AS product_data
+		s.store_id,
+		SUM(s.quantity),
+		JSONB_AGG (
+	    		JSONB_BUILD_OBJECT (
+	    			'product_id', p.product_id,
+				'product_name', p.product_name,
+				'brand_id', p.brand_id,
+				'category_id', p.category_id,
+	            'category_data',    JSONB_BUILD_OBJECT(
+	                'category_id', c.category_id,
+	                'category_name', c.category_name
+	            ),
+				'model_year', p.model_year,
+				'list_price', p.list_price,
+				'quantity', s.quantity
+			)
+		) AS product_data
 		FROM stocks AS s 
 		LEFT JOIN products AS p ON p.product_id = s.product_id
- 		WHERE s.store_id = $1
+		LEFT JOIN categories AS c ON c.category_id = p.category_id
+		WHERE s.store_id = $1
 		GROUP BY s.store_id
 	`
 	err = r.db.QueryRow(ctx, query, req.StoreId).Scan(
@@ -201,7 +206,6 @@ func (r *stockRepo) GetList(ctx context.Context, req *models.GetListStockRequest
 	}
 
 	query += filter + " GROUP BY s.store_id " + offset + limit
-	fmt.Println(query)
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {

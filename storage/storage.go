@@ -90,10 +90,12 @@ type OrderRepoI interface {
 	RemoveOrderItem(ctx context.Context, req *models.OrderItemPrimaryKey) error
 }
 
-// -------------------------------------------------------------------------------------
+// ------------------------EXAM-------------------------------------------------------------
 type ReportRepoI interface {
 	ExchangeStoreProduct(ctx context.Context, req *models.ExchangeProduct) (fromId int, toId int, err error)
 	StaffSaleReport(ctx context.Context, req *models.GetListEmployeeReportRequest) (resp *models.GetListEmployeeReportResponse, err error)
+	GetCategoryData(ctx context.Context, storeId int) (resp []*models.CategoryStockProduct, err error)
+	GetOnlyCategoryDataFromStock(ctx context.Context) (resp []*models.CategoryStockProductData, err error)
 }
 
 type PromoCodeRepoI interface {

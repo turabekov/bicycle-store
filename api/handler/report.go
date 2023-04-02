@@ -4,10 +4,13 @@ import (
 	"app/api/models"
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/xuri/excelize/v2"
 )
 
 // TASK1
@@ -167,7 +170,7 @@ func (h *Handler) TotalOrderPrice(c *gin.Context) {
 			response.Discount = promoCode.Discount
 		} else if promoCode.DiscountType == "percent" && totalPrice >= promoCode.OrderLimitPrice {
 			totalPrice = totalPrice - totalPrice*promoCode.Discount/100
-			response.Discount = totalPrice * promoCode.Discount / 100
+			response.Discount = math.Round((totalPrice*promoCode.Discount/100)*100) / 100
 		}
 
 		if totalPrice <= 0 {
@@ -175,6 +178,137 @@ func (h *Handler) TotalOrderPrice(c *gin.Context) {
 		}
 	}
 
-	response.ResultPrice = totalPrice
+	response.ResultPrice = math.Round(totalPrice*100) / 100
 	h.handlerResponse(c, "get list product response", http.StatusOK, response)
+}
+
+// TASK6
+
+// Get GetStockDataExcel
+// @ID get_report_stock
+// @Router /report/stock_excel [GET]
+// @Summary GetStockDataExcel
+// @Description GetStockDataExcel
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server Error"
+func (h *Handler) GetStockDataExcel(c *gin.Context) {
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	stocks, err := h.storages.Stock().GetList(context.Background(), &models.GetListStockRequest{
+		Offset: 0,
+		Limit:  10,
+		Search: c.Query("search"),
+	})
+	if err != nil {
+		h.handlerResponse(c, "storage.stock.getlist", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	data := [][]interface{}{}
+	// dynamic titles
+	stores := []interface{}{
+		"Намеклатура", "Цена",
+	}
+	// get stores
+	for _, stock := range stocks.Stocks {
+		store, err := h.storages.Store().GetByID(context.Background(), &models.StorePrimaryKey{StoreId: stock.StoreId})
+		if err != nil {
+			h.handlerResponse(c, "storage.store.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+		stores = append(stores, store.StoreName)
+	}
+	data = append(data, stores)
+
+	for idx, row := range data {
+		cell, err := excelize.CoordinatesToCellName(1, idx+1)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		f.SetSheetRow("Sheet1", cell, &row)
+	}
+
+	// get category products Data
+	for index, stock := range stocks.Stocks {
+
+		resp, err := h.storages.Report().GetCategoryData(context.Background(), stock.StoreId)
+		if err != nil {
+			h.handlerResponse(c, "storage.stock.getByID", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		k := 2
+		for _, categoryProduct := range resp {
+
+			location := fmt.Sprintf("A%d", k)
+			location2 := fmt.Sprintf("E%d", k)
+
+			style, _ := f.NewStyle(&excelize.Style{
+				Fill: excelize.Fill{Type: "pattern", Color: []string{"#808080"}, Pattern: 1},
+			})
+			f.SetCellValue("Sheet1", location, categoryProduct.CategoryName)
+			f.SetColWidth("Sheet1", "A", "A", 50)
+			f.SetColWidth("Sheet1", "B", "B", 16)
+			f.SetColWidth("Sheet1", "C", "C", 16)
+			f.SetColWidth("Sheet1", "D", "D", 16)
+			f.SetColWidth("Sheet1", "E", "E", 16)
+
+			locationAmountCategory := ""
+			if index == 0 {
+				locationAmountCategory = fmt.Sprintf("C%d", k)
+			} else if index == 1 {
+				locationAmountCategory = fmt.Sprintf("D%d", k)
+			} else if index == 2 {
+				locationAmountCategory = fmt.Sprintf("E%d", k)
+			}
+
+			f.SetCellValue("Sheet1", locationAmountCategory, categoryProduct.Quantity)
+
+			f.SetCellStyle("Sheet1", location, location2, style)
+
+			for j, p := range categoryProduct.CategoryShopProducts {
+
+				location3 := fmt.Sprintf("A%d", k)
+				locationPrice := fmt.Sprintf("B%d", k)
+
+				if j == 0 {
+					location3 = fmt.Sprintf("A%d", k+1)
+					locationPrice = fmt.Sprintf("B%d", k+1)
+					k++
+				}
+
+				locationAmount := ""
+				if index == 0 {
+					locationAmount = fmt.Sprintf("C%d", k)
+				} else if index == 1 {
+					locationAmount = fmt.Sprintf("D%d", k)
+				} else if index == 2 {
+					locationAmount = fmt.Sprintf("E%d", k)
+				}
+
+				f.SetCellValue("Sheet1", location3, p.ProductName)
+				f.SetCellValue("Sheet1", locationPrice, p.ListPrice)
+				f.SetCellValue("Sheet1", locationAmount, p.Quantity)
+				k++
+			}
+
+		}
+
+	}
+
+	if err := f.SaveAs("excel-data/stock_report.xlsx"); err != nil {
+		fmt.Println(err)
+	}
+
+	h.handlerResponse(c, "get stock data", http.StatusCreated, "File saved successfully! (path: ./excel-data/stock_report.xlsx)")
 }
