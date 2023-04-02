@@ -253,9 +253,14 @@ func (h *Handler) GetStockDataExcel(c *gin.Context) {
 			location := fmt.Sprintf("A%d", k)
 			location2 := fmt.Sprintf("E%d", k)
 
-			style, _ := f.NewStyle(&excelize.Style{
-				Fill: excelize.Fill{Type: "pattern", Color: []string{"#808080"}, Pattern: 1},
+			style, err := f.NewStyle(&excelize.Style{
+				Fill:      excelize.Fill{Type: "pattern", Color: []string{"#808080"}, Pattern: 1},
+				Alignment: &excelize.Alignment{Horizontal: "center"},
 			})
+			if err != nil {
+				fmt.Println(err)
+			}
+
 			f.SetCellValue("Sheet1", location, categoryProduct.CategoryName)
 			f.SetColWidth("Sheet1", "A", "A", 50)
 			f.SetColWidth("Sheet1", "B", "B", 16)
