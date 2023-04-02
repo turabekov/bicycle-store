@@ -44,7 +44,7 @@ report.go
 ### route http://localhost:4001/order_item/ ✅
 
 Bonus Vazifa -> Ифторлик
-6. Stock (Склад) bor malumotlarni Excel formatida chiqishi kerak. xlsx yoki csv
+## 6. Stock (Склад) bor malumotlarni Excel formatida chiqishi kerak. xlsx yoki csv
 Maslan shu formatida:
 
 Намеклатура   |  Цена	         | Megan planeta  	|  Texnomart  | Ustore
