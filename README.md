@@ -1,11 +1,31 @@
-# 1. Omborxonadagi (stock) productlarni boshqa bir magazinga otkizishlik kerak.
+
+# Bicycle Store service
+
+## used technoligies
+- Go
+- Gin Web Framework
+- PostgreSQL
+- Excelize package for import excel file
+- Swagger
+
+<img
+  src="./img/diagram.jpg"
+  alt="Alt text"
+  title="Diagram of store"
+  style="display: inline-block; margin: 0 auto; max-width: 300px">
+
+
+
+
+
+### 1. Omborxonadagi (stock) productlarni boshqa bir magazinga otkizishlik kerak.
 Masalan: Mega planeta magazinidan 10 ta product Texno mart magaziniga otkizdi
 
 
 Hisobot 
 ### route http://localhost:4001/report/exchange ✅
 
-# 2. Har bir hodim qancha mahsulot sotganligi boyicha malumot chiqishi kerak
+### 2. Har bir hodim qancha mahsulot sotganligi boyicha malumot chiqishi kerak
 Masalan:
 Сотурник         | Категори     | Продукт    | Количество | Обший Цена   | Дата
 ---------------------------------------------------------------------------------
@@ -18,7 +38,7 @@ Hisoblash
 
 ### route http://localhost:4001/report/employee ✅
 
-# 3. Promo code CRUD Method boladi. (Update shartmas)
+### 3. Promo code CRUD Method boladi. (Update shartmas)
 Promo Code
 	- name
 	- discount = 47 500
@@ -27,7 +47,7 @@ Promo Code
 
 ### route http://localhost:4001/promo_code ✅
 
-# 4. Order Total Sum Api boladi. Shu api order_id berilsa umumiy summa hisoblab
+### 4. Order Total Sum Api boladi. Shu api order_id berilsa umumiy summa hisoblab
 	berishi kerak. Agar promo code ham berilsa chegirmalar ham hisoblanishi kerak
 
 Masalan:
@@ -36,15 +56,14 @@ Masalan:
 
 ### route http://localhost:4001/total_order_price/:id  ✅
 
-# 5. Order Item qoshilganda produclarni Stock (Склад) dan olishi kerak.
+### 5. Order Item qoshilganda produclarni Stock (Склад) dan olishi kerak.
 	Agar magazin sklad da product qolmagan bolsa "Товарь не найден" habari chiqishi kerak
 
 report.go 
 
 ### route http://localhost:4001/order_item/ ✅
 
-Bonus Vazifa -> Ифторлик
-## 6. Stock (Склад) bor malumotlarni Excel formatida chiqishi kerak. xlsx yoki csv
+### 6. Stock (Склад) bor malumotlarni Excel formatida chiqishi kerak. xlsx yoki csv
 Maslan shu formatida:
 
 Намеклатура   |  Цена	         | Megan planeta  	|  Texnomart  | Ustore
@@ -59,4 +78,3 @@ HP computer   |     400 000      |      0			|  	 5		  |   9
 
 ### route http://localhost:4001/report/stock  ✅
 
-Deadline: 2023-04-02 20:00

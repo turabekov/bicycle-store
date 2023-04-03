@@ -70,33 +70,33 @@ func (h *Handler) GetStockDataExcelDynamic(c *gin.Context) {
 			} else {
 				hash[product.ProductId] = append(hash[product.ProductId], product.Quantity)
 			}
-
+			// {name, price, 16, 30, 2}
 		}
 
 	}
 
-	categoriesStocks, err := h.storages.Report().GetOnlyCategoryDataFromStock(context.Background())
-	if err != nil {
-		h.handlerResponse(c, "storage.stock.CategoryStock", http.StatusInternalServerError, err.Error())
-		return
-	}
+	// categoriesStocks, err := h.storages.Report().GetOnlyCategoryDataFromStock(context.Background())
+	// if err != nil {
+	// 	h.handlerResponse(c, "storage.stock.CategoryStock", http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
 
-	for _, cat := range categoriesStocks {
-		obj := []interface{}{}
-		obj = append(obj, cat.CategoryName, nil, cat.Quantity)
+	// for _, cat := range categoriesStocks {
+	// 	obj := []interface{}{}
+	// 	obj = append(obj, cat.CategoryName, nil, cat.Quantity)
 
-		data = append(data, obj)
+	// 	data = append(data, obj)
 
-		for _, val := range hash {
-			if cat.CategoryId == val[0].(int) {
-				obj := []interface{}{}
-				obj = append(obj, val[1:]...)
-				data = append(data, obj)
-			}
+	// 	for _, val := range hash {
+	// 		if cat.CategoryId == val[0].(int) {
+	// 			obj := []interface{}{}
+	// 			obj = append(obj, val[1:]...)
+	// 			data = append(data, obj)
+	// 		}
 
-		}
+	// 	}
 
-	}
+	// }
 
 	for idx, row := range data {
 		cell, err := excelize.CoordinatesToCellName(1, idx+1)
