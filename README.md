@@ -1,5 +1,5 @@
 
-# Bicycle Store service
+# Bicycle Store e-commerce
 
 ## used technoligies
 - Go Programming Language
