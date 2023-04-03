@@ -2,7 +2,7 @@
 # Bicycle Store service
 
 ## used technoligies
-- Go
+- Go Programming Language
 - Gin Web Framework
 - PostgreSQL
 - Excelize package for import excel file
