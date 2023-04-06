@@ -44,7 +44,6 @@ func (r *orderRepo) Create(ctx context.Context, req *models.CreateOrder) (int, e
 			)
 			, $1, $2, now()::date, $3, $4, $5, $6) RETURNING order_id
 	`
-	fmt.Println(query)
 
 	err := r.db.QueryRow(ctx, query,
 		helper.NewNullInt32(req.CustomerId),

@@ -4,6 +4,7 @@ import (
 	"app/api/models"
 	"app/pkg/helper"
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -22,7 +23,7 @@ func NewCategoryRepo(db *pgxpool.Pool) *categoryRepo {
 func (r *categoryRepo) Create(ctx context.Context, req *models.CreateCategory) (int, error) {
 	var (
 		query string
-		id    int
+		id    sql.NullInt64
 	)
 
 	query = `
@@ -43,7 +44,7 @@ func (r *categoryRepo) Create(ctx context.Context, req *models.CreateCategory) (
 		return 0, err
 	}
 
-	return id, nil
+	return int(id.Int64), nil
 }
 
 func (r *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryKey) (*models.Category, error) {

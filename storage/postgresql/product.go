@@ -40,7 +40,6 @@ func (r *productRepo) Create(ctx context.Context, req *models.CreateProduct) (in
 			)
 			, $1, $2, $3, $4, $5) RETURNING product_id
 	`
-	fmt.Println(query)
 
 	err := r.db.QueryRow(ctx, query,
 		req.ProductName,
