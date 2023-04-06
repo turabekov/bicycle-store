@@ -47,7 +47,8 @@ func (h *Handler) CreatePromoCode(c *gin.Context) {
 		return
 	}
 
-	h.handlerResponse(c, "create promo_code", http.StatusCreated, resp)
+	// h.handlerResponse(c, "create promo_code", http.StatusCreated, resp)
+	c.JSON(http.StatusCreated, resp)
 }
 
 // Get By ID PromoCode godoc

@@ -9,7 +9,7 @@ type Customer struct {
 	Street     string `json:"street"`
 	City       string `json:"city"`
 	State      string `json:"state"`
-	ZipCode    string `json:"zip_code"`
+	ZipCode    int    `json:"zip_code"`
 }
 
 type CustomerPrimaryKey struct {

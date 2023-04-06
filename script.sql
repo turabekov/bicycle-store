@@ -195,3 +195,18 @@ GROUP BY  c.category_id
         5 |       3 |         26 |        1 |     599.99 |     0.07 |           
 
 SELECT * FROM stocks WHERE product_id = 20 AND store_id = 1;
+
+
+INSERT INTO staffs(
+	staff_id, 
+	first_name,
+	last_name,
+	email,
+	phone,
+	active,
+	store_id,
+	manager_id
+)
+VALUES (
+	4, 'Virgie', 'Wiggins', 'virgie.wiggins@bikes.shop', 
+    '(831) 555-5557', 1, 1, 2);
