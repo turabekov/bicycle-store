@@ -100,4 +100,15 @@ CREATE TABLE promo_code (
 	discount DECIMAL (10, 2) NOT NULL,
 	discount_type VARCHAR CHECK(discount_type = 'percent' OR discount_type = 'fixed') DEFAULT 'fixed',
 	order_limit_price  DECIMAL (10, 2) DEFAULT 0
-)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL, 
+  login VARCHAR NOT NULL UNIQUE,
+  password VARCHAR NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX idx_login ON users(login);

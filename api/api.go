@@ -16,14 +16,20 @@ import (
 func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger logger.LoggerI) {
 	handler := handler.NewHandler(cfg, store, logger)
 
-	//  report
-	r.PUT("/report/exchange", handler.ExchangeStoreProductHandler)
-	r.GET("/report/employee", handler.GetEmployeeReport)
-	r.GET("/total_order_price/:id", handler.TotalOrderPrice)
-	//  excel
-	r.GET("/report/stock_excel", handler.GetStockDataExcel)
+	// @securityDefinitions.apikey ApiKeyAuth
+	// @in header
+	// @name Authorization
 
-	// r.GET("/report/stock", handler.GetStockDataExcelDynamic)
+	r.Use(customCORSMiddleware())
+
+	r.POST("/register", handler.Register)
+	r.POST("/login", handler.Login)
+	// user api
+	r.POST("/user", handler.CreateUser)
+	r.GET("/user/:id", handler.GetByIdUser)
+	r.GET("/user", handler.GetListUser)
+	r.PUT("/user/:id", handler.UpdateUser)
+	r.DELETE("/user/:id", handler.DeleteUser)
 
 	// promo_code api
 	r.POST("/promo_code", handler.CreatePromoCode)
@@ -84,15 +90,40 @@ func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger lo
 	r.DELETE("/staff/:id", handler.DeleteStaff)
 
 	// order api
-	r.POST("/order", handler.CreateOrder)
-	r.GET("/order/:id", handler.GetByIdOrder)
-	r.GET("/order", handler.GetListOrder)
-	r.PUT("/order/:id", handler.UpdateOrder)
-	r.PATCH("/order/:id", handler.UpdatePatchOrder)
-	r.DELETE("/order/:id", handler.DeleteOrder)
-	r.POST("/order_item/", handler.CreateOrderItem)
-	r.DELETE("/order_item/:id", handler.DeleteOrderItem)
+	r.POST("/order", handler.AuthMiddleware(), handler.CreateOrder)
+	r.GET("/order/:id", handler.AuthMiddleware(), handler.GetByIdOrder)
+	r.GET("/order", handler.AuthMiddleware(), handler.GetListOrder)
+	r.PUT("/order/:id", handler.AuthMiddleware(), handler.UpdateOrder)
+	r.PATCH("/order/:id", handler.AuthMiddleware(), handler.UpdatePatchOrder)
+	r.DELETE("/order/:id", handler.AuthMiddleware(), handler.DeleteOrder)
+	r.POST("/order_item/", handler.AuthMiddleware(), handler.CreateOrderItem)
+	r.DELETE("/order_item/:id", handler.AuthMiddleware(), handler.DeleteOrderItem)
+
+	//  report
+	r.PUT("/report/exchange", handler.ExchangeStoreProductHandler)
+	r.GET("/report/employee", handler.GetEmployeeReport)
+	r.GET("/total_order_price/:id", handler.TotalOrderPrice)
+	//  excel
+	r.GET("/report/stock_excel", handler.GetStockDataExcel)
+
+	// r.GET("/report/stock", handler.GetStockDataExcelDynamic)
 
 	url := ginSwagger.URL("swagger/doc.json") // The url pointing to API definition
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+}
+
+func customCORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		c.Header("Acces-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE, HEAD")
+		c.Header("Access-Control-Allow-Headers", "Platform-Id, Content-Type, Content-Length, Accept-Encoding, X-CSF-TOKEN, Authorization, Cache-Control")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }

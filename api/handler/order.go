@@ -2,7 +2,9 @@ package handler
 
 import (
 	"app/api/models"
+	"app/pkg/helper"
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -87,6 +89,7 @@ func (h *Handler) GetByIdOrder(c *gin.Context) {
 	h.handlerResponse(c, "get order by id", http.StatusCreated, resp)
 }
 
+// @Security ApiKeyAuth
 // Get List Order godoc
 // @ID get_list_order
 // @Router /order [GET]
@@ -102,6 +105,15 @@ func (h *Handler) GetByIdOrder(c *gin.Context) {
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server Error"
 func (h *Handler) GetListOrder(c *gin.Context) {
+
+	info, exists := c.Get("Auth")
+	if !exists {
+		h.handlerResponse(c, "invalid info token", http.StatusBadRequest, "invalid info token")
+		return
+	}
+
+	User := info.(helper.TokenInfo)
+	fmt.Println(User.UserID)
 
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
@@ -312,7 +324,7 @@ func (h *Handler) CreateOrderItem(c *gin.Context) {
 		return
 	}
 	// ----------CREATE ORDER ITEM------------------------------------------------------------------------------------------
-	// WHEN create order item in postgres will execute trigger for getting products from store 
+	// WHEN create order item in postgres will execute trigger for getting products from store
 	err = h.storages.Order().AddOrderItem(context.Background(), &createOrderItem)
 	if err != nil {
 		h.handlerResponse(c, "storage.order_item.create", http.StatusInternalServerError, err.Error())

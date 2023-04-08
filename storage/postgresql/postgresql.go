@@ -21,6 +21,7 @@ type Store struct {
 	order     storage.OrderRepoI
 	report    storage.ReportRepoI
 	promoCode storage.PromoCodeRepoI
+	user      storage.UserRepoI
 }
 
 func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
@@ -53,11 +54,20 @@ func NewConnectPostgresql(cfg *config.Config) (storage.StorageI, error) {
 		order:     NewOrderRepo(pgpool),
 		report:    NewReportRepo(pgpool),
 		promoCode: NewPromoCodeRepo(pgpool),
+		user:      NewUserRepo(pgpool),
 	}, nil
 }
 
 func (s *Store) CloseDB() {
 	s.db.Close()
+}
+
+func (s *Store) User() storage.UserRepoI {
+	if s.user == nil {
+		s.user = NewUserRepo(s.db)
+	}
+
+	return s.user
 }
 
 func (s *Store) Brand() storage.BrandRepoI {

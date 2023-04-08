@@ -17,6 +17,14 @@ type StorageI interface {
 	Order() OrderRepoI
 	Report() ReportRepoI
 	PromoCode() PromoCodeRepoI
+	User() UserRepoI
+}
+type UserRepoI interface {
+	Create(ctx context.Context, req *models.CreateUser) (string, error)
+	GetByID(ctx context.Context, req *models.UserPrimaryKey) (*models.User, error)
+	GetList(ctx context.Context, req *models.GetListUserRequest) (resp *models.GetListUserResponse, err error)
+	Update(ctx context.Context, req *models.UpdateUser) (int64, error)
+	Delete(ctx context.Context, req *models.UserPrimaryKey) (int64, error)
 }
 
 type ProductRepoI interface {
