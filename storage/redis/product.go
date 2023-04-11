@@ -29,23 +29,6 @@ func (c *productCacheRepo) Create(req *models.GetListProductResponse) error {
 		return err
 	}
 
-	if req.Limit <= 0 {
-		req.Limit = 10
-	}
-	err = c.cache.Set("product_limit", req.Limit, 0).Err()
-	if err != nil {
-		return err
-	}
-
-	if req.Offset <= 0 {
-		req.Offset = 0
-	}
-
-	err = c.cache.Set("product_offset", req.Offset, 0).Err()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
