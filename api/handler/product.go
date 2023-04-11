@@ -3,6 +3,7 @@ package handler
 import (
 	"app/api/models"
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -40,6 +41,12 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 	resp, err := h.storages.Product().GetByID(context.Background(), &models.ProductPrimaryKey{ProductId: id})
 	if err != nil {
 		h.handlerResponse(c, "storage.product.getByID", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = h.cache.Product().Delete()
+	if err != nil {
+		h.handlerResponse(c, "cache.product.Delete", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -105,13 +112,41 @@ func (h *Handler) GetListProduct(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.storages.Product().GetList(context.Background(), &models.GetListProductRequest{
-		Offset: offset,
-		Limit:  limit,
-		Search: c.Query("search"),
-	})
+	exists, err := h.cache.Product().Exists(limit, offset)
 	if err != nil {
-		h.handlerResponse(c, "storage.product.getlist", http.StatusInternalServerError, err.Error())
+		h.handlerResponse(c, "cache.product.Exists", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !exists {
+
+		resp, err := h.storages.Product().GetList(context.Background(), &models.GetListProductRequest{
+			Offset: offset,
+			Limit:  limit,
+			Search: c.Query("search"),
+		})
+		if err != nil {
+			h.handlerResponse(c, "storage.product.getlist", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		fmt.Println("Postgres")
+
+		err = h.cache.Product().Create(resp)
+		if err != nil {
+			h.handlerResponse(c, "cachce.product.getlist", http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		h.handlerResponse(c, "get list product response", http.StatusOK, resp)
+		return
+	}
+
+	fmt.Println("Redis")
+
+	resp, err := h.cache.Product().GetAll()
+	if err != nil {
+		h.handlerResponse(c, "cache.product.getlist", http.StatusInternalServerError, err.Error())
 		return
 	}
 

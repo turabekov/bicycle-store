@@ -33,6 +33,11 @@ type Config struct {
 	PostgresPort           string
 	PostgresMaxConnections int32
 
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	RedisDB       int
+
 	DefaultOffset int
 	DefaultLimit  int
 
@@ -56,6 +61,11 @@ func Load() Config {
 	cfg.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "admin@111"))
 	cfg.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "bikestore"))
 	cfg.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAXCONS", 20))
+
+	cfg.RedisHost = cast.ToString(getOrReturnDefaultValue("REDIS_HOST", "localhost:"))
+	cfg.RedisPort = cast.ToString(getOrReturnDefaultValue("REDIS_PORT", 6379))
+	cfg.RedisPassword = cast.ToString(getOrReturnDefaultValue("REDIS_PASSWORD", ""))
+	cfg.RedisDB = cast.ToInt(getOrReturnDefaultValue("REDIS_DB", "khumoyun"))
 
 	cfg.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "secretkey"))
 

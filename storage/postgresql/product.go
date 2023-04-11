@@ -143,10 +143,16 @@ func (r *productRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
+		resp.Offset = req.Offset
+	} else {
+		resp.Offset = 0
 	}
 
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
+		resp.Limit = req.Limit
+	} else {
+		resp.Limit = 10
 	}
 
 	query += filter + offset + limit

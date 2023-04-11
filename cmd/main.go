@@ -5,6 +5,7 @@ import (
 	"app/config"
 	"app/pkg/logger"
 	"app/storage/postgresql"
+	"app/storage/redis"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -46,12 +47,19 @@ func main() {
 	}
 	defer store.CloseDB()
 
+	cache, err := redis.NewConnectRedis(&cfg)
+	if err != nil {
+		log.Panic("Error connect to redis: ", logger.Error(err))
+		return
+	}
+	defer cache.CloseDB()
+
 	r := gin.New()
 
 	// call logger
 	r.Use(gin.Recovery(), gin.Logger())
 
-	api.NewApi(r, &cfg, store, log)
+	api.NewApi(r, &cfg, store, cache, log)
 
 	fmt.Println("Server running on port", cfg.ServerHost+cfg.ServerPort)
 	err = r.Run(cfg.ServerHost + cfg.ServerPort)

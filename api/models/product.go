@@ -39,5 +39,7 @@ type GetListProductRequest struct {
 
 type GetListProductResponse struct {
 	Count    int        `json:"count"`
+	Offset   int        `json:"offset"`
+	Limit    int        `json:"limit"`
 	Products []*Product `json:"products"`
 }

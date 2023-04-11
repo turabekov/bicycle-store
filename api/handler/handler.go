@@ -13,6 +13,7 @@ type Handler struct {
 	cfg      *config.Config
 	logger   logger.LoggerI
 	storages storage.StorageI
+	cache    storage.StorageCacheI
 }
 
 type Response struct {
@@ -21,11 +22,12 @@ type Response struct {
 	Data        interface{}
 }
 
-func NewHandler(cfg *config.Config, store storage.StorageI, logger logger.LoggerI) *Handler {
+func NewHandler(cfg *config.Config, store storage.StorageI, cache storage.StorageCacheI, logger logger.LoggerI) *Handler {
 	return &Handler{
 		cfg:      cfg,
 		logger:   logger,
 		storages: store,
+		cache:    cache,
 	}
 }
 

@@ -13,8 +13,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
-func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger logger.LoggerI) {
-	handler := handler.NewHandler(cfg, store, logger)
+func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, cache storage.StorageCacheI, logger logger.LoggerI) {
+	handler := handler.NewHandler(cfg, store, cache, logger)
 
 	// @securityDefinitions.apikey ApiKeyAuth
 	// @in header
